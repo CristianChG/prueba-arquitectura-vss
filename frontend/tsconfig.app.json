@@ -8,6 +8,33 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@assets/*": ["src/app/assets/*"],
+      "@hooks/*": ["src/app/hooks/*"],
+      "@providers/*": ["src/app/providers/*"],
+      "@routes/*": ["src/app/routes/*"],
+      "@domain/*": ["src/domain/*"],
+      "@entities/*": ["src/domain/entities/*"],
+      "@repositories/*": ["src/domain/repositories/*"],
+      "@usecases/*": ["src/domain/usecases/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@adapters/*": ["src/infrastructure/adapters/*"],
+      "@api/*": ["src/infrastructure/api/*"],
+      "@storage/*": ["src/infrastructure/storage/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@components/*": ["src/presentation/components/*"],
+      "@atoms/*": ["src/presentation/components/atoms/*"],
+      "@molecules/*": ["src/presentation/components/molecules/*"],
+      "@organisms/*": ["src/presentation/components/organisms/*"],
+      "@pages/*": ["src/presentation/components/pages/*"],
+      "@templates/*": ["src/presentation/components/templates/*"],
+      "@styles/*": ["src/presentation/styles/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
