@@ -1,7 +1,5 @@
-// src/domain/usecases/RegisterUser.ts
-
-import type { IAuthRepository } from "../repositories/IAuthRepository";
-import type { RegisterData, AuthResponse } from "../entities/User";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
+import type { RegisterData, AuthResponse } from "@entities/User";
 
 export class RegisterUser {
   private authRepository: IAuthRepository;

@@ -38,6 +38,9 @@ export default defineConfig({
       ),
       "@styles": path.resolve(__dirname, "./src/presentation/styles"),
       "@utils": path.resolve(__dirname, "./src/utils"),
+      "@constants": path.resolve(__dirname, "./src/utils/constants"),
+      "@formatters": path.resolve(__dirname, "./src/utils/formatters"),
+      "@validators": path.resolve(__dirname, "./src/utils/validators"),
     },
   },
 });

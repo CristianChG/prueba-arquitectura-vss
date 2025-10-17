@@ -1,0 +1,5 @@
+export const UI = {
+  BREAKPOINTS: { SM: 600, MD: 900, LG: 1200 },
+  ZINDEX: { MODAL: 1300, MENU: 1200, TOOLTIP: 1500 },
+  ALERT_TIMEOUT: 4000,
+};

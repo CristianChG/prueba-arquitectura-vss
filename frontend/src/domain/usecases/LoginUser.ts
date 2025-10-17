@@ -1,7 +1,5 @@
-// src/domain/usecases/LoginUser.ts
-
-import type { IAuthRepository } from "../repositories/IAuthRepository";
-import type { LoginCredentials, AuthResponse } from "../entities/User";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
+import type { LoginCredentials, AuthResponse } from "@entities/User";
 
 export class LoginUser {
   private authRepository: IAuthRepository;

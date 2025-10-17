@@ -1,6 +1,4 @@
-// src/presentation/components/pages/LoginPage.tsx
-
-import { LoginForm } from "../organisms/LoginForm";
+import { LoginForm } from "@organisms/LoginForm";
 
 export const LoginPage = () => {
   return (

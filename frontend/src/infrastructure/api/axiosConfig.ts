@@ -5,7 +5,7 @@ import axios, {
   AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { LocalStorageService } from "../storage/LocalStorageService";
+import { LocalStorageService } from "@storage/LocalStorageService";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";

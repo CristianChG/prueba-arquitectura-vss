@@ -1,7 +1,5 @@
-// src/presentation/components/organisms/LoginForm.tsx
-
 import { useState, type FormEvent } from "react";
-import { useAuth } from "../../../app/hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
 
 export const LoginForm = () => {
   const { login } = useAuth();

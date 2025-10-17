@@ -1,27 +1,22 @@
-// src/infrastructure/storage/LocalStorageService.ts
-
-import type { User, AuthTokens } from "../../domain/entities/User";
-
-const ACCESS_TOKEN_KEY = "access_token";
-const REFRESH_TOKEN_KEY = "refresh_token";
-const USER_KEY = "user_data";
+import type { User, AuthTokens } from "@entities/User";
+import { STORAGE_KEYS } from "@constants/storageKeys";
+import { decodeToken, isTokenExpired } from "@validators/tokenValidators";
 
 export class LocalStorageService {
-  // Tokens
   static setAccessToken(token: string): void {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
   }
 
   static getAccessToken(): string | null {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return localStorage.getItem(STORAGE_KEYS.TOKEN);
   }
 
   static setRefreshToken(token: string): void {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
   }
 
   static getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
   }
 
   static setTokens(tokens: AuthTokens): void {
@@ -30,17 +25,17 @@ export class LocalStorageService {
   }
 
   static clearTokens(): void {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
   }
 
   // User data
   static setUser(user: User): void {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   }
 
   static getUser(): User | null {
-    const userData = localStorage.getItem(USER_KEY);
+    const userData = localStorage.getItem(STORAGE_KEYS.USER);
     if (!userData) return null;
 
     try {
@@ -51,7 +46,7 @@ export class LocalStorageService {
   }
 
   static clearUser(): void {
-    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(STORAGE_KEYS.USER);
   }
 
   // Clear all auth data
@@ -66,29 +61,6 @@ export class LocalStorageService {
     return !!token;
   }
 
-  // Decode JWT token (sin verificación - solo para lectura)
-  static decodeToken(token: string): any {
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
-  }
-
-  // Check if token is expired
-  static isTokenExpired(token: string): boolean {
-    const decoded = this.decodeToken(token);
-    if (!decoded || !decoded.exp) return true;
-
-    const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime;
-  }
+  static decodeToken = decodeToken;
+  static isTokenExpired = isTokenExpired;
 }

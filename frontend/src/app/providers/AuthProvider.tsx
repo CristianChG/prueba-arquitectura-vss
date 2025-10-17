@@ -1,15 +1,11 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
-import type {
-  User,
-  LoginCredentials,
-  RegisterData,
-} from "../../domain/entities/User";
-import AuthAPI from "../../infrastructure/api/AuthAPI";
-import { LoginUser } from "../../domain/usecases/LoginUser";
-import { RegisterUser } from "../../domain/usecases/RegisterUser";
-import { LogoutUser } from "../../domain/usecases/LogoutUser";
-import { GetCurrentUser } from "../../domain/usecases/GetCurrentUser";
-import { LocalStorageService } from "../../infrastructure/storage/LocalStorageService";
+import type { User, LoginCredentials, RegisterData } from "@entities/User";
+import AuthAPI from "@api/AuthAPI";
+import { LoginUser } from "@usecases/LoginUser";
+import { RegisterUser } from "@usecases/RegisterUser";
+import { LogoutUser } from "@usecases/LogoutUser";
+import { GetCurrentUser } from "@usecases/GetCurrentUser";
+import { LocalStorageService } from "@storage/LocalStorageService";
 
 interface AuthContextType {
   user: User | null;

@@ -1,7 +1,5 @@
-// src/presentation/components/organisms/RegisterForm.tsx
-
 import { useState, type FormEvent } from "react";
-import { useAuth } from "../../../app/hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
 
 export const RegisterForm = () => {
   const { register } = useAuth();

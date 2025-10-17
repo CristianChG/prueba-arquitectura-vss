@@ -1,14 +1,14 @@
 // src/infrastructure/api/AuthAPI.ts
 
-import axiosInstance from "./axiosConfig";
+import axiosInstance from "@api/axiosConfig";
 import type {
   AuthResponse,
   LoginCredentials,
   RegisterData,
   User,
-} from "../../domain/entities/User";
-import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import { LocalStorageService } from "../storage/LocalStorageService";
+} from "@entities/User";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
+import { LocalStorageService } from "@storage/LocalStorageService";
 
 export default class AuthAPI implements IAuthRepository {
   private readonly baseURL = "/auth";

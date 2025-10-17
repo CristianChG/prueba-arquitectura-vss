@@ -1,0 +1,7 @@
+export const COLORS = {
+  PRIMARY: "#1976D2",
+  SECONDARY: "#424242",
+  SUCCESS: "#2E7D32",
+  ERROR: "#D32F2F",
+  WARNING: "#ED6C02",
+};

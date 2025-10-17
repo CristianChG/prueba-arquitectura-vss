@@ -1,5 +1,4 @@
-// src/domain/usecases/LogoutUser.ts
-import type { IAuthRepository } from "../repositories/IAuthRepository";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
 
 export class LogoutUser {
   private authRepository: IAuthRepository;

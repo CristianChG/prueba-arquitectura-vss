@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "jest"],
     "skipLibCheck": true,
 
     /* Path aliases */
@@ -32,7 +32,10 @@
       "@pages/*": ["src/presentation/components/pages/*"],
       "@templates/*": ["src/presentation/components/templates/*"],
       "@styles/*": ["src/presentation/styles/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@constants/*": ["src/utils/constants/*"],
+      "@formatters/*": ["src/utils/formatters/*"],
+      "@validators/*": ["src/utils/validators/*"]
     },
 
     /* Bundler mode */

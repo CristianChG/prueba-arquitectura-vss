@@ -1,6 +1,5 @@
-// src/domain/usecases/RefreshAuthToken.ts
-import type { IAuthRepository } from "../repositories/IAuthRepository";
-import type { AuthResponse } from "../entities/User";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
+import type { AuthResponse } from "@entities/User";
 
 export class RefreshAuthToken {
   private authRepository: IAuthRepository;

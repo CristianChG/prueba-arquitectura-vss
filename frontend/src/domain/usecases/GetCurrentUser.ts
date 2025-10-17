@@ -1,6 +1,5 @@
-// src/domain/usecases/GetCurrentUser.ts
-import type { IAuthRepository } from "../repositories/IAuthRepository";
-import type { User } from "../entities/User";
+import type { IAuthRepository } from "@repositories/IAuthRepository";
+import type { User } from "@entities/User";
 
 export class GetCurrentUser {
   private authRepository: IAuthRepository;

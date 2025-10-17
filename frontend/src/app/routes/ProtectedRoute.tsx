@@ -1,7 +1,7 @@
 // src/app/routes/ProtectedRoute.tsx
 
 import type { ReactNode } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: ReactNode;

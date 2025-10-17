@@ -1,6 +1,4 @@
-// src/presentation/components/pages/RegisterPage.tsx
-
-import { RegisterForm } from "../organisms/RegisterForm";
+import { RegisterForm } from "@organisms/RegisterForm";
 
 export const RegisterPage = () => {
   return (
