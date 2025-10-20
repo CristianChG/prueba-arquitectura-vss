@@ -20,6 +20,7 @@
       "@entities/*": ["src/domain/entities/*"],
       "@repositories/*": ["src/domain/repositories/*"],
       "@usecases/*": ["src/domain/usecases/*"],
+      "@validations/*": ["src/domain/validations/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@adapters/*": ["src/infrastructure/adapters/*"],
       "@api/*": ["src/infrastructure/api/*"],
@@ -52,7 +53,8 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }

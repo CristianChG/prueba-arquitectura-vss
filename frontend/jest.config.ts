@@ -17,6 +17,7 @@ const config: Config = {
     "^@entities/(.*)$": "<rootDir>/src/domain/entities/$1",
     "^@repositories/(.*)$": "<rootDir>/src/domain/repositories/$1",
     "^@usecases/(.*)$": "<rootDir>/src/domain/usecases/$1",
+    "^@validations/(.*)$": "<rootDir>/src/domain/validations/$1",
     "^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
     "^@adapters/(.*)$": "<rootDir>/src/infrastructure/adapters/$1",
     "^@api/(.*)$": "<rootDir>/src/infrastructure/api/$1",

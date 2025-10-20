@@ -16,6 +16,7 @@ export default defineConfig({
       "@entities": path.resolve(__dirname, "./src/domain/entities"),
       "@repositories": path.resolve(__dirname, "./src/domain/repositories"),
       "@usecases": path.resolve(__dirname, "./src/domain/usecases"),
+      "@validations": path.resolve(__dirname, "./src/domain/validations"),
       "@infrastructure": path.resolve(__dirname, "./src/infrastructure"),
       "@adapters": path.resolve(__dirname, "./src/infrastructure/adapters"),
       "@api": path.resolve(__dirname, "./src/infrastructure/api"),

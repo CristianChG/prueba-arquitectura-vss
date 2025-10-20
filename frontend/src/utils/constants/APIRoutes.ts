@@ -1,7 +1,9 @@
-export const APIRoutes = {
-  LOGIN: "/login",
-  LOGOUT: "/logout",
-  PRODUCTS: "/products",
-  SUPPLIERS: "/suppliers",
-  USERS: "/users",
+export const API_ROUTES = {
+  ROOT: "/api",
+  LOGIN: "/api/auth/login",
+  LOGOUT: "/api/auth/logout",
+  REGISTER: "/api/auth/register",
+  REFRESH_TOKEN: "/api/auth/refresh",
+  GET_CURRENT_USER: "/api/auth/me",
+  DASHBOARD: "/api/dashboard",
 };

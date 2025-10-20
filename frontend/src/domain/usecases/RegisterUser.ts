@@ -1,27 +1,40 @@
 import type { IAuthRepository } from "@repositories/IAuthRepository";
-import type { RegisterData, AuthResponse } from "@entities/User";
+import type { User } from "@entities/User";
+import { MESSAGES } from "@constants/messages";
+import { EmailValidation } from "@validations/auth/EmailValidation";
+import { PasswordValidation } from "@validations/auth/PasswordValidation";
+import { NameValidation } from "@validations/auth/NameValidation";
 
-export class RegisterUser {
+export class RegisterUserUseCase {
   private authRepository: IAuthRepository;
+  private emailValidation: EmailValidation;
+  private passwordValidation: PasswordValidation;
+  private nameValidation: NameValidation;
 
   constructor(authRepository: IAuthRepository) {
     this.authRepository = authRepository;
+    this.emailValidation = new EmailValidation();
+    this.passwordValidation = new PasswordValidation();
+    this.nameValidation = new NameValidation();
   }
 
-  async execute(data: RegisterData): Promise<AuthResponse> {
-    if (!data.email || !data.password || !data.name) {
-      throw new Error("Todos los campos son requeridos");
+  async execute(email: string, password: string, name: string): Promise<User> {
+    if (!email || !password || !name) {
+      throw new Error(MESSAGES.AUTH.REQUIRED_FIELDS);
     }
 
-    if (data.password.length < 8) {
-      throw new Error("La contraseña debe tener al menos 8 caracteres");
+    if (this.emailValidation.validate(email) === false) {
+      throw new Error(MESSAGES.AUTH.INVALID_EMAIL);
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      throw new Error("Email inválido");
+    if (this.passwordValidation.validate(password) === false) {
+      throw new Error(MESSAGES.AUTH.INVALID_PASSWORD);
     }
 
-    return await this.authRepository.register(data);
+    if (this.nameValidation.validate(name) === false) {
+      throw new Error(MESSAGES.AUTH.INVALID_NAME);
+    }
+
+    return this.authRepository.register(email, password, name);
   }
 }
