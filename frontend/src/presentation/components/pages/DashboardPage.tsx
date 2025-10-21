@@ -1,5 +1,3 @@
-// src/presentation/components/pages/DashboardPage.tsx
-
 import { useAuth } from "../../../app/hooks/useAuth";
 
 export const DashboardPage = () => {
