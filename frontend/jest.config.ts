@@ -15,6 +15,7 @@ const config: Config = {
     "^@routes/(.*)$": "<rootDir>/src/app/routes/$1",
     "^@domain/(.*)$": "<rootDir>/src/domain/$1",
     "^@entities/(.*)$": "<rootDir>/src/domain/entities/$1",
+    "^@factories/(.*)$": "<rootDir>/src/domain/factories/$1",
     "^@repositories/(.*)$": "<rootDir>/src/domain/repositories/$1",
     "^@usecases/(.*)$": "<rootDir>/src/domain/usecases/$1",
     "^@validations/(.*)$": "<rootDir>/src/domain/validations/$1",
