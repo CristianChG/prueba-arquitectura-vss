@@ -1,0 +1,6 @@
+export const DATE = {
+  DISPLAY_FORMAT: "DD/MM/YYYY",
+  API_FORMAT: "YYYY-MM-DD",
+  MAX_YEAR: 2100,
+  MIN_YEAR: 2000,
+};

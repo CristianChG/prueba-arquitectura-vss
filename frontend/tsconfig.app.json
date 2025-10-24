@@ -5,8 +5,40 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "jest"],
     "skipLibCheck": true,
+
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@assets/*": ["src/app/assets/*"],
+      "@hooks/*": ["src/app/hooks/*"],
+      "@providers/*": ["src/app/providers/*"],
+      "@routes/*": ["src/app/routes/*"],
+      "@domain/*": ["src/domain/*"],
+      "@entities/*": ["src/domain/entities/*"],
+      "@factories/*": ["src/domain/factories/*"],
+      "@repositories/*": ["src/domain/repositories/*"],
+      "@usecases/*": ["src/domain/usecases/*"],
+      "@validations/*": ["src/domain/validations/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@adapters/*": ["src/infrastructure/adapters/*"],
+      "@api/*": ["src/infrastructure/api/*"],
+      "@storage/*": ["src/infrastructure/storage/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@components/*": ["src/presentation/components/*"],
+      "@atoms/*": ["src/presentation/components/atoms/*"],
+      "@molecules/*": ["src/presentation/components/molecules/*"],
+      "@organisms/*": ["src/presentation/components/organisms/*"],
+      "@pages/*": ["src/presentation/components/pages/*"],
+      "@templates/*": ["src/presentation/components/templates/*"],
+      "@styles/*": ["src/presentation/styles/*"],
+      "@utils/*": ["src/utils/*"],
+      "@constants/*": ["src/utils/constants/*"],
+      "@formatters/*": ["src/utils/formatters/*"],
+      "@validators/*": ["src/utils/validators/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -22,7 +54,8 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }
