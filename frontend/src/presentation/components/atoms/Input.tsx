@@ -12,6 +12,7 @@ interface InputProps extends Omit<MuiTextFieldProps, "variant"> {
   isPassword?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  variant?: "standard" | "outlined" | "filled";
 }
 
 export const Input = forwardRef<HTMLDivElement, InputProps>(
@@ -24,6 +25,7 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
       leftIcon,
       rightIcon,
       type,
+      variant = "standard",
       InputProps: inputProps,
       ...props
     },
@@ -36,7 +38,7 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
         error={error}
         helperText={helperText}
         type={isPassword ? "password" : type}
-        variant="outlined"
+        variant={variant}
         fullWidth
         InputProps={{
           startAdornment: leftIcon ? (

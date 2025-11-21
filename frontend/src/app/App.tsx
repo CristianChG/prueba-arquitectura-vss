@@ -1,12 +1,15 @@
 import React from "react";
+import { ThemeProvider } from "@providers/ThemeProvider";
 import { AuthProvider } from "@providers/AuthProvider";
 import { AppRoutes } from "@routes/index";
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

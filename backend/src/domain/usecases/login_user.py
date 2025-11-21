@@ -19,7 +19,6 @@ class LoginUser:
         if not self.email_validation.validate(email):
             raise ValueError("Invalid email format")
 
-        if not self.password_validation.validate(password):
-            raise ValueError("Invalid password format")
-
+        # Note: We don't validate password format on login
+        # Only validate that credentials match the database
         return await self.auth_repository.login(email, password)

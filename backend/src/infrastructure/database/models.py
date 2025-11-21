@@ -1,15 +1,7 @@
-from sqlalchemy import Column, String, DateTime, Integer, Float, JSON, ForeignKey, Enum
+from sqlalchemy import Column, String, DateTime, Integer, JSON, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
-import enum
+from datetime import datetime, timezone
 from infrastructure.database.db_config import Base
-
-
-class RoleEnum(str, enum.Enum):
-    """User role enumeration."""
-    ADMIN = "admin"
-    USER = "user"
-    RESEARCHER = "researcher"
 
 
 class UserModel(Base):
@@ -17,17 +9,16 @@ class UserModel(Base):
 
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True)
-    email = Column(String, unique=True, nullable=False, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    password_hash = Column(String, nullable=False)
-    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.USER)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    email = Column(String, unique=True, nullable=False, index=True)
+    password = Column(String, nullable=False)
+    role = Column(Integer, nullable=False, default=3)  # 1=ADMIN, 2=COLAB, 3=PENDING_APPROVAL
 
     # Relationships
-    cows = relationship("CowModel", back_populates="owner", cascade="all, delete-orphan")
     datasets = relationship("DatasetModel", back_populates="uploader", cascade="all, delete-orphan")
+    models = relationship("ModelModel", back_populates="uploader", cascade="all, delete-orphan")
+    predictions = relationship("PredictionModel", back_populates="user", cascade="all, delete-orphan")
 
 
 class CowModel(Base):
@@ -35,19 +26,11 @@ class CowModel(Base):
 
     __tablename__ = "cows"
 
-    id = Column(String, primary_key=True)
-    name = Column(String, nullable=False)
-    breed = Column(String, nullable=False)
-    birth_date = Column(DateTime, nullable=False)
-    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
-    health_status = Column(String, nullable=False)
-    last_checkup = Column(DateTime, nullable=True)
-    notes = Column(String, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     # Relationships
-    owner = relationship("UserModel", back_populates="cows")
+    datasets = relationship("DatasetModel", back_populates="cow", cascade="all, delete-orphan")
+    predictions = relationship("PredictionModel", back_populates="cow", cascade="all, delete-orphan")
 
 
 class DatasetModel(Base):
@@ -55,20 +38,18 @@ class DatasetModel(Base):
 
     __tablename__ = "datasets"
 
-    id = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    cow_id = Column(Integer, ForeignKey("cows.id"), nullable=False)
     name = Column(String, nullable=False)
-    file_path = Column(String, nullable=False)
-    file_size = Column(Integer, nullable=False)
-    uploaded_by = Column(String, ForeignKey("users.id"), nullable=False)
-    status = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    processed_at = Column(DateTime, nullable=True)
-    # Use 'meta' instead of 'metadata' (reserved by SQLAlchemy)
-    meta = Column(JSON, nullable=True)
+    blob_route = Column(String, nullable=False)
+    upload_date = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    cleaning_state = Column(String, nullable=False)
 
     # Relationships
     uploader = relationship("UserModel", back_populates="datasets")
-    models = relationship("ModelModel", back_populates="dataset", cascade="all, delete-orphan")
+    cow = relationship("CowModel", back_populates="datasets")
+    predictions = relationship("PredictionModel", back_populates="dataset", cascade="all, delete-orphan")
 
 
 class ModelModel(Base):
@@ -76,18 +57,34 @@ class ModelModel(Base):
 
     __tablename__ = "models"
 
-    id = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
-    version = Column(String, nullable=False)
-    model_type = Column(String, nullable=False)
-    accuracy = Column(Float, nullable=True)
-    dataset_id = Column(String, ForeignKey("datasets.id"), nullable=False)
-    trained_by = Column(String, ForeignKey("users.id"), nullable=False)
-    status = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    trained_at = Column(DateTime, nullable=True)
-    model_path = Column(String, nullable=True)
-    parameters = Column(JSON, nullable=True)
+    description = Column(String, nullable=True)
+    blob_route = Column(String, nullable=False)
+    model_metadata = Column(JSON, nullable=True)
 
     # Relationships
-    dataset = relationship("DatasetModel", back_populates="models")
+    uploader = relationship("UserModel", back_populates="models")
+    predictions = relationship("PredictionModel", back_populates="model", cascade="all, delete-orphan")
+
+
+class PredictionModel(Base):
+    """SQLAlchemy ORM model for predictions."""
+
+    __tablename__ = "predictions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    cow_id = Column(Integer, ForeignKey("cows.id"), nullable=False)
+    model_id = Column(Integer, ForeignKey("models.id"), nullable=False)
+    dataset_id = Column(Integer, ForeignKey("datasets.id"), nullable=False)
+    date = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    result = Column(JSON, nullable=False)
+    state = Column(String, nullable=False)
+
+    # Relationships
+    user = relationship("UserModel", back_populates="predictions")
+    cow = relationship("CowModel", back_populates="predictions")
+    model = relationship("ModelModel", back_populates="predictions")
+    dataset = relationship("DatasetModel", back_populates="predictions")

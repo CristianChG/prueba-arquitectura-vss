@@ -52,9 +52,7 @@ class AuthController:
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
-                "role": user.role.value,
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "role": user.role
             }), 201
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
@@ -87,9 +85,7 @@ class AuthController:
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
-                "role": user.role.value,
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "role": user.role
             }), 200
         except ValueError as e:
             return jsonify({"error": str(e)}), 404

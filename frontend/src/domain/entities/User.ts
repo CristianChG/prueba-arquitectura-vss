@@ -1,10 +1,10 @@
 import type { Role } from "@constants/roles";
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
   role: Role;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
