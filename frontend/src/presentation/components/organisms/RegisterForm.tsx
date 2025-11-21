@@ -3,12 +3,14 @@ import { Box, Typography, FormControlLabel, Checkbox } from "@mui/material";
 import { FormField } from "@molecules/FormField";
 import { AlertBox } from "@molecules/AlertBox";
 import { Button } from "@atoms/Button";
+import { CheckCircle, Cancel } from "@mui/icons-material";
 import {
   emailValidator,
   registerPasswordValidator,
   passwordMatchValidator,
   nameValidator,
 } from "@factories/AuthValidatorFactory";
+import { APP_CONFIG } from "@constants/appConfig";
 
 interface RegisterFormProps {
   onSubmit: (email: string, password: string, name: string) => Promise<void>;
@@ -35,6 +37,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     password: "",
     confirmPassword: "",
   });
+
+  // Validaciones individuales de políticas de contraseña
+  const passwordPolicies = {
+    minLength: formData.password.length >= APP_CONFIG.PASSWORD_MIN_LENGTH,
+    hasUppercase: /[A-Z]/.test(formData.password),
+    hasLowercase: /[a-z]/.test(formData.password),
+    hasNumber: /[0-9]/.test(formData.password),
+  };
+
+  // Determinar si hay errores en los campos de contraseña
+  const allPasswordPoliciesMet =
+    passwordPolicies.minLength &&
+    passwordPolicies.hasUppercase &&
+    passwordPolicies.hasLowercase &&
+    passwordPolicies.hasNumber;
+
+  const passwordHasError = formData.password.length > 0 && !allPasswordPoliciesMet;
+  const confirmPasswordHasError =
+    formData.confirmPassword.length > 0 &&
+    formData.password !== formData.confirmPassword;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -114,13 +136,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       onSubmit={handleSubmit}
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
     >
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: 700, textAlign: "center", mb: 1 }}
-      >
-        Crear Cuenta
-      </Typography>
-
       {(error || initialError) && (
         <AlertBox
           message={error || initialError || ""}
@@ -158,35 +173,137 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         }}
       />
 
-      <FormField
-        label="Contraseña"
-        required
-        error={!!fieldErrors.password}
-        helperText={fieldErrors.password}
-        inputProps={{
-          name: "password",
-          value: formData.password,
-          onChange: handleChange,
-          type: "password",
-          placeholder: "Mínimo 8 caracteres (mayúscula, minúscula, número)",
-          disabled: isLoading,
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 2,
         }}
-      />
+      >
+        <Box sx={{ flex: 1 }}>
+          <FormField
+            label="Contraseña"
+            required
+            error={!!fieldErrors.password || passwordHasError}
+            helperText={fieldErrors.password}
+            inputProps={{
+              name: "password",
+              value: formData.password,
+              onChange: handleChange,
+              type: "password",
+              placeholder: "Ingresa tu contraseña",
+              disabled: isLoading,
+            }}
+          />
 
-      <FormField
-        label="Confirmar Contraseña"
-        required
-        error={!!fieldErrors.confirmPassword}
-        helperText={fieldErrors.confirmPassword}
-        inputProps={{
-          name: "confirmPassword",
-          value: formData.confirmPassword,
-          onChange: handleChange,
-          type: "password",
-          placeholder: "Repite tu contraseña",
-          disabled: isLoading,
-        }}
-      />
+          {/* Políticas de contraseña */}
+          {formData.password && (
+            <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {passwordPolicies.minLength ? (
+                  <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+                ) : (
+                  <Cancel sx={{ fontSize: 16, color: "error.main" }} />
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: passwordPolicies.minLength ? "success.main" : "error.main",
+                  }}
+                >
+                  Mínimo {APP_CONFIG.PASSWORD_MIN_LENGTH} caracteres
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {passwordPolicies.hasUppercase ? (
+                  <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+                ) : (
+                  <Cancel sx={{ fontSize: 16, color: "error.main" }} />
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: passwordPolicies.hasUppercase ? "success.main" : "error.main",
+                  }}
+                >
+                  Al menos una letra mayúscula
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {passwordPolicies.hasLowercase ? (
+                  <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+                ) : (
+                  <Cancel sx={{ fontSize: 16, color: "error.main" }} />
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: passwordPolicies.hasLowercase ? "success.main" : "error.main",
+                  }}
+                >
+                  Al menos una letra minúscula
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {passwordPolicies.hasNumber ? (
+                  <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+                ) : (
+                  <Cancel sx={{ fontSize: 16, color: "error.main" }} />
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: passwordPolicies.hasNumber ? "success.main" : "error.main",
+                  }}
+                >
+                  Al menos un número
+                </Typography>
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        <Box sx={{ flex: 1 }}>
+          <FormField
+            label="Confirmar Contraseña"
+            required
+            error={!!fieldErrors.confirmPassword || confirmPasswordHasError}
+            helperText={fieldErrors.confirmPassword}
+            inputProps={{
+              name: "confirmPassword",
+              value: formData.confirmPassword,
+              onChange: handleChange,
+              type: "password",
+              placeholder: "Repite tu contraseña",
+              disabled: isLoading,
+            }}
+          />
+
+          {/* Validación de coincidencia de contraseñas */}
+          {formData.confirmPassword && (
+            <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+              {formData.password === formData.confirmPassword ? (
+                <>
+                  <CheckCircle sx={{ fontSize: 16, color: "success.main" }} />
+                  <Typography variant="caption" sx={{ color: "success.main" }}>
+                    Las contraseñas coinciden
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Cancel sx={{ fontSize: 16, color: "error.main" }} />
+                  <Typography variant="caption" sx={{ color: "error.main" }}>
+                    Las contraseñas no coinciden
+                  </Typography>
+                </>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Box>
 
       <FormControlLabel
         control={
@@ -209,16 +326,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </Typography>
         }
       />
-
       <Button
-        label={isLoading ? "Registrando..." : "Registrarse"}
+        label={isLoading ? "Registrando..." : "Crear cuenta"}
         type="submit"
+        color="primary"
         isLoading={isLoading}
         variant="contained"
         fullWidth
-        size="large"
         disabled={isLoading}
-        sx={{ mt: 1 }}
+        sx={{
+          mt: 2,
+          py: 1.5,
+          borderRadius: 2,
+          textTransform: "none",
+          fontSize: "1rem",
+        }}
       />
     </Box>
   );

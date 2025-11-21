@@ -1,19 +1,17 @@
 from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
-
-
-class Role(str, Enum):
-    ADMIN = "admin"
-    USER = "user"
-    RESEARCHER = "researcher"
 
 
 @dataclass
 class User:
-    id: str
-    email: str
+    """User domain entity.
+
+    Role values (stored in utils.constants.roles):
+    - 1: ADMIN
+    - 2: COLAB
+    - 3: PENDING_APPROVAL
+    """
+    id: int
     name: str
-    role: Role
-    created_at: datetime
-    updated_at: datetime
+    email: str
+    password: str
+    role: int

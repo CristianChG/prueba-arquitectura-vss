@@ -1,19 +1,13 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 
 
 @dataclass
 class Model:
-    id: str
+    """Model domain entity."""
+    id: int
+    user_id: int
     name: str
-    version: str
-    model_type: str
-    accuracy: Optional[float]
-    dataset_id: str
-    trained_by: str
-    status: str
-    created_at: datetime
-    trained_at: Optional[datetime] = None
-    model_path: Optional[str] = None
-    parameters: Optional[dict] = None
+    description: Optional[str]
+    blob_route: str
+    metadata: Optional[Dict[str, Any]] = None

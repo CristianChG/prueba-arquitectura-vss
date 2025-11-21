@@ -4,11 +4,15 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-interface ButtonProps extends MuiButtonProps {
+type ColorVariant = "primary" | "secondary" | "success" | "warning" | "info" | "error";
+
+interface ButtonProps extends Omit<MuiButtonProps, "color" | "variant"> {
   label: string;
   isLoading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: "start" | "end";
+  variant?: "text" | "outlined" | "contained";
+  color?: ColorVariant;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -19,6 +23,8 @@ export const Button: React.FC<ButtonProps> = ({
   iconPosition = "start",
   startIcon,
   endIcon,
+  variant = "contained",
+  color = "primary",
   ...props
 }) => {
   const computedStartIcon = iconPosition === "start" ? icon : startIcon;
@@ -26,6 +32,8 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <MuiButton
+      variant={variant}
+      color={color}
       disabled={disabled || isLoading}
       startIcon={
         isLoading ? (

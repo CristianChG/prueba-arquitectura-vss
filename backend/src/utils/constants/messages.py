@@ -3,53 +3,53 @@
 
 class AuthMessages:
     """Authentication-related messages."""
-    REQUIRED_FIELDS = "Email and password are required"
-    INVALID_EMAIL = "Invalid email format"
-    INVALID_PASSWORD = "Password must be 8-128 characters with uppercase, lowercase, and digit"
-    INVALID_NAME = "Invalid name format"
-    INVALID_CREDENTIALS = "Invalid credentials"
-    INVALID_TOKEN = "Invalid token"
-    TOKEN_EXPIRED = "Token has expired"
-    USER_EXISTS = "User with this email already exists"
-    USER_NOT_FOUND = "User not found"
-    UNAUTHORIZED = "Unauthorized access"
-    LOGOUT_SUCCESS = "Logged out successfully"
+    REQUIRED_FIELDS = "El correo electrónico y la contraseña son requeridos"
+    INVALID_EMAIL = "Formato de correo electrónico inválido"
+    INVALID_PASSWORD = "La contraseña debe tener 8-128 caracteres con mayúscula, minúscula y número"
+    INVALID_NAME = "Formato de nombre inválido"
+    INVALID_CREDENTIALS = "Credenciales inválidas"
+    INVALID_TOKEN = "Token inválido"
+    TOKEN_EXPIRED = "El token ha expirado"
+    USER_EXISTS = "Ya existe un usuario con este correo electrónico"
+    USER_NOT_FOUND = "Usuario no encontrado"
+    UNAUTHORIZED = "Acceso no autorizado"
+    LOGOUT_SUCCESS = "Sesión cerrada exitosamente"
 
 
 class CowMessages:
     """Cow-related messages."""
-    COW_NOT_FOUND = "Cow not found"
-    COW_CREATED = "Cow created successfully"
-    COW_UPDATED = "Cow updated successfully"
-    COW_DELETED = "Cow deleted successfully"
-    INVALID_COW_DATA = "Invalid cow data provided"
+    COW_NOT_FOUND = "Vaca no encontrada"
+    COW_CREATED = "Vaca creada exitosamente"
+    COW_UPDATED = "Vaca actualizada exitosamente"
+    COW_DELETED = "Vaca eliminada exitosamente"
+    INVALID_COW_DATA = "Datos de vaca inválidos"
 
 
 class DatasetMessages:
     """Dataset-related messages."""
-    DATASET_NOT_FOUND = "Dataset not found"
-    DATASET_UPLOADED = "Dataset uploaded successfully"
-    DATASET_DELETED = "Dataset deleted successfully"
-    NO_FILE_PROVIDED = "No file provided"
-    INVALID_FILE = "Invalid file"
-    UPLOAD_FAILED = "Failed to upload dataset"
+    DATASET_NOT_FOUND = "Dataset no encontrado"
+    DATASET_UPLOADED = "Dataset subido exitosamente"
+    DATASET_DELETED = "Dataset eliminado exitosamente"
+    NO_FILE_PROVIDED = "No se proporcionó ningún archivo"
+    INVALID_FILE = "Archivo inválido"
+    UPLOAD_FAILED = "Falló la subida del dataset"
 
 
 class ModelMessages:
     """Model-related messages."""
-    MODEL_NOT_FOUND = "Model not found"
-    MODEL_CREATED = "Model created successfully"
-    TRAINING_STARTED = "Model training started"
-    TRAINING_FAILED = "Model training failed"
+    MODEL_NOT_FOUND = "Modelo no encontrado"
+    MODEL_CREATED = "Modelo creado exitosamente"
+    TRAINING_STARTED = "Entrenamiento del modelo iniciado"
+    TRAINING_FAILED = "Falló el entrenamiento del modelo"
 
 
 class GeneralMessages:
     """General application messages."""
-    SUCCESS = "Operation completed successfully"
-    INTERNAL_ERROR = "Internal server error"
-    INVALID_REQUEST = "Invalid request"
-    NOT_FOUND = "Resource not found"
-    FORBIDDEN = "Access forbidden"
+    SUCCESS = "Operación completada exitosamente"
+    INTERNAL_ERROR = "Error interno del servidor"
+    INVALID_REQUEST = "Solicitud inválida"
+    NOT_FOUND = "Recurso no encontrado"
+    FORBIDDEN = "Acceso prohibido"
 
 
 # Export constants

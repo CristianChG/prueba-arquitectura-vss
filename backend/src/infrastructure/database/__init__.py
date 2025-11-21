@@ -1,5 +1,5 @@
 from .db_config import DatabaseConfig, db_config, Base
-from .models import UserModel, CowModel, DatasetModel, ModelModel, RoleEnum
+from .models import UserModel, CowModel, DatasetModel, ModelModel, PredictionModel
 
 __all__ = [
     "DatabaseConfig",
@@ -9,5 +9,5 @@ __all__ = [
     "CowModel",
     "DatasetModel",
     "ModelModel",
-    "RoleEnum",
+    "PredictionModel",
 ]

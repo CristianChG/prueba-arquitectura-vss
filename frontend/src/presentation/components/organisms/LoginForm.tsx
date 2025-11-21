@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Typography, Link } from "@mui/material";
+import { Box } from "@mui/material";
 import { AlertBox } from "@molecules/AlertBox";
 import { FormField } from "@molecules/FormField";
 import { Button } from "@atoms/Button";
@@ -71,15 +71,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
     >
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: 700, textAlign: "center", mb: 1 }}
-      >
-        Iniciar Sesión
-      </Typography>
-
       {(error || initialError) && (
         <AlertBox
           message={error || initialError || ""}
@@ -89,8 +82,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <FormField
-        label="Correo Electrónico"
-        required
+        label="Correo electrónico"
         error={!!fieldErrors.email}
         helperText={fieldErrors.email}
         inputProps={{
@@ -98,14 +90,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           value: formData.email,
           onChange: handleChange,
           type: "email",
-          placeholder: "usuario@ejemplo.com",
+          placeholder: "juan.perez@example.com",
           disabled: isLoading,
         }}
       />
 
       <FormField
         label="Contraseña"
-        required
         error={!!fieldErrors.password}
         helperText={fieldErrors.password}
         inputProps={{
@@ -113,32 +104,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           value: formData.password,
           onChange: handleChange,
           type: "password",
-          placeholder: "••••••••",
+          placeholder: "********",
           disabled: isLoading,
         }}
       />
 
-      <Link
-        component="button"
-        type="button"
-        variant="body2"
-        onClick={(e) => {
-          e.preventDefault();
-        }}
-        sx={{ textAlign: "right", cursor: "pointer", mt: 0.5 }}
-      >
-        ¿Olvidaste tu contraseña?
-      </Link>
-
       <Button
-        label={isLoading ? "Iniciando sesión..." : "Ingresar"}
+        label="Iniciar sesión"
         type="submit"
+        color="primary"
         isLoading={isLoading}
         variant="contained"
         fullWidth
-        size="large"
         disabled={isLoading}
-        sx={{ mt: 1 }}
+        sx={{
+          mt: 2,
+          py: 1.5,
+          borderRadius: 2,
+          textTransform: "none",
+          fontSize: "1rem",
+        }}
       />
     </Box>
   );

@@ -7,7 +7,7 @@ import { APP_CONFIG } from "@constants/appConfig";
 import { API_ROUTES } from "@constants/APIRoutes";
 import { APP_ROUTES } from "@constants/AppRoutes";
 
-const API_BASE_URL = APP_CONFIG.API_BASE_URL || "http://localhost:3000/api";
+const API_BASE_URL = APP_CONFIG.API_BASE_URL || "http://localhost";
 
 const storageService = new LocalStorageService();
 

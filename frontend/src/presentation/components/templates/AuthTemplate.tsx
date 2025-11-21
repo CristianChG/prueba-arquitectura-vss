@@ -1,4 +1,4 @@
-import { Box, Container, Paper, Typography, Link } from "@mui/material";
+import { Box, Typography, Link } from "@mui/material";
 
 interface AuthTemplateProps {
   children: React.ReactNode;
@@ -6,17 +6,15 @@ interface AuthTemplateProps {
   subtitle?: string;
   footerText?: string;
   footerLinkText?: string;
-  footerLinkHref?: string;
   onFooterLinkClick?: () => void;
 }
 
 export const AuthTemplate: React.FC<AuthTemplateProps> = ({
   children,
-  title = "Autenticación",
-  subtitle = "Gestión Inteligente de Ganado",
+  title = "Iniciar sesión",
+  subtitle = "Bienvenido a saturno",
   footerText,
   footerLinkText,
-  footerLinkHref,
   onFooterLinkClick,
 }) => {
   return (
@@ -24,119 +22,116 @@ export const AuthTemplate: React.FC<AuthTemplateProps> = ({
       sx={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        py: 4,
+        flexDirection: { xs: "column", md: "row" },
       }}
     >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={8}
+      {/* Left side - Form */}
+      <Box
+        sx={{
+          flex: { xs: "1", md: "0 0 60%" },
+          backgroundColor: "#F2F0EF",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          px: { xs: 3, sm: 6, md: 8, lg: 12 },
+          py: { xs: 4, md: 6 },
+          minHeight: { xs: "auto", md: "100vh" },
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ mb: 6 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 400,
+              color: "text.primary",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            SATURNO 🪐🌾
+          </Typography>
+        </Box>
+
+        {/* Title */}
+        <Typography
+          variant="h3"
           sx={{
-            p: { xs: 3, sm: 4 },
-            borderRadius: 3,
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+            fontWeight: 400,
+            mb: 3,
+            color: "text.primary",
+            fontSize: { xs: "2rem", md: "2.5rem" },
           }}
         >
-          {/* Header */}
-          <Box sx={{ textAlign: "center", mb: 4 }}>
-            <Box
+          {title}
+        </Typography>
+
+        {/* Subtitle */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 400,
+            mb: 4,
+            color: "text.primary",
+          }}
+        >
+          {subtitle}
+        </Typography>
+
+        {/* Form Content */}
+        <Box sx={{ mb: 3 }}>{children}</Box>
+
+        {/* Footer Link */}
+        {footerText && footerLinkText && (
+          <Box sx={{ mt: 2 }}>
+            <Typography
+              variant="body2"
               sx={{
-                width: 60,
-                height: 60,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mx: "auto",
-                mb: 2,
+                color: "text.secondary",
               }}
             >
-              <Typography
-                variant="h4"
+              {footerText}{" "}
+              <Link
+                component="button"
+                variant="body2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onFooterLinkClick?.();
+                }}
                 sx={{
-                  color: "white",
-                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  color: "#71873F",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
                 }}
               >
-                🪐
-              </Typography>
-            </Box>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {title}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {subtitle}
+                {footerLinkText}
+              </Link>
             </Typography>
           </Box>
+        )}
+      </Box>
 
-          {/* Content */}
-          {children}
-
-          {/* Footer Link */}
-          {footerText && (
-            <Box
-              sx={{
-                textAlign: "center",
-                mt: 3,
-                pt: 3,
-                borderTop: "1px solid #e0e0e0",
-              }}
-            >
-              <Typography variant="body2" color="textSecondary">
-                {footerText}{" "}
-                {footerLinkText && (
-                  <Link
-                    type="button"
-                    variant="body2"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onFooterLinkClick?.();
-                    }}
-                    href={footerLinkHref || "#"}
-                    sx={{
-                      cursor: "pointer",
-                      fontWeight: 700,
-                      textDecoration: "none",
-                      color: "#667eea",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    {footerLinkText}
-                  </Link>
-                )}
-              </Typography>
-            </Box>
-          )}
-        </Paper>
-
-        {/* Additional Info */}
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            textAlign: "center",
-            mt: 3,
-            color: "rgba(255, 255, 255, 0.7)",
-          }}
-        >
-          © 2024 Gestión Inteligente de Ganado. Todos los derechos reservados.
-        </Typography>
-      </Container>
+      {/* Right side - Background Image */}
+      <Box
+        sx={{
+          flex: { xs: "0", md: "0 0 40%" },
+          minHeight: { xs: "200px", md: "100vh" },
+          backgroundImage:
+            "url(/auth_banner_vertical.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          display: { xs: "none", md: "block" },
+        }}
+      />
     </Box>
   );
 };

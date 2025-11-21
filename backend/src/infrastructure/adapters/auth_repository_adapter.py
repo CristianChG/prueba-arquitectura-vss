@@ -1,12 +1,13 @@
 import jwt
 import bcrypt
-import uuid
 from datetime import datetime, timedelta
 from typing import Optional
-from domain.entities import User, AuthToken, Role
+from domain.entities import User, AuthToken
 from domain.repositories import IAuthRepository
-from infrastructure.database import UserModel, RoleEnum
+from infrastructure.database import UserModel
 from infrastructure.database.db_config import db_config
+from utils.constants.roles import ROLE_PENDING_APPROVAL
+from utils.constants.messages import AuthMessages
 import os
 
 
@@ -38,11 +39,11 @@ class AuthRepositoryAdapter(IAuthRepository):
             user_model = session.query(UserModel).filter(UserModel.email == email).first()
 
             if not user_model:
-                raise ValueError("Invalid credentials")
+                raise ValueError(AuthMessages.INVALID_CREDENTIALS)
 
             # Verify password
-            if not bcrypt.checkpw(password.encode('utf-8'), user_model.password_hash.encode('utf-8')):
-                raise ValueError("Invalid credentials")
+            if not bcrypt.checkpw(password.encode('utf-8'), user_model.password.encode('utf-8')):
+                raise ValueError(AuthMessages.INVALID_CREDENTIALS)
 
             # Generate tokens
             access_token = self._create_access_token(user_model.id)
@@ -62,18 +63,17 @@ class AuthRepositoryAdapter(IAuthRepository):
             # Check if user exists
             existing_user = session.query(UserModel).filter(UserModel.email == email).first()
             if existing_user:
-                raise ValueError("User with this email already exists")
+                raise ValueError(AuthMessages.USER_EXISTS)
 
             # Hash password
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-            # Create user
+            # Create user (id is auto-increment, no need to set it)
             user_model = UserModel(
-                id=str(uuid.uuid4()),
                 email=email,
                 name=name,
-                password_hash=password_hash,
-                role=RoleEnum.USER
+                password=password_hash,
+                role=ROLE_PENDING_APPROVAL
             )
 
             session.add(user_model)
@@ -84,7 +84,7 @@ class AuthRepositoryAdapter(IAuthRepository):
         finally:
             session.close()
 
-    async def logout(self, user_id: str) -> None:
+    async def logout(self, user_id: int) -> None:
         """Logout user (invalidate tokens - implement token blacklist if needed)."""
         # In a production system, you would add the token to a blacklist
         pass
@@ -96,7 +96,7 @@ class AuthRepositoryAdapter(IAuthRepository):
             user_id = payload.get("sub")
 
             if not user_id:
-                raise ValueError("Invalid refresh token")
+                raise ValueError(AuthMessages.INVALID_TOKEN)
 
             # Generate new tokens
             access_token = self._create_access_token(user_id)
@@ -107,9 +107,9 @@ class AuthRepositoryAdapter(IAuthRepository):
                 refresh_token=new_refresh_token
             )
         except jwt.ExpiredSignatureError:
-            raise ValueError("Refresh token expired")
+            raise ValueError(AuthMessages.TOKEN_EXPIRED)
         except jwt.InvalidTokenError:
-            raise ValueError("Invalid refresh token")
+            raise ValueError(AuthMessages.INVALID_TOKEN)
 
     async def verify_token(self, token: str) -> dict:
         """Verify and decode JWT token."""
@@ -117,24 +117,24 @@ class AuthRepositoryAdapter(IAuthRepository):
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             return payload
         except jwt.ExpiredSignatureError:
-            raise ValueError("Token expired")
+            raise ValueError(AuthMessages.TOKEN_EXPIRED)
         except jwt.InvalidTokenError:
-            raise ValueError("Invalid token")
+            raise ValueError(AuthMessages.INVALID_TOKEN)
 
-    async def get_current_user(self, user_id: str) -> User:
+    async def get_current_user(self, user_id: int) -> User:
         """Get current authenticated user."""
         session = self.db.get_session()
         try:
             user_model = session.query(UserModel).filter(UserModel.id == user_id).first()
 
             if not user_model:
-                raise ValueError("User not found")
+                raise ValueError(AuthMessages.USER_NOT_FOUND)
 
             return self._model_to_entity(user_model)
         finally:
             session.close()
 
-    def _create_access_token(self, user_id: str) -> str:
+    def _create_access_token(self, user_id: int) -> str:
         """Create JWT access token."""
         expire = datetime.utcnow() + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = {
@@ -144,7 +144,7 @@ class AuthRepositoryAdapter(IAuthRepository):
         }
         return jwt.encode(payload, self.SECRET_KEY, algorithm=self.ALGORITHM)
 
-    def _create_refresh_token(self, user_id: str) -> str:
+    def _create_refresh_token(self, user_id: int) -> str:
         """Create JWT refresh token."""
         expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         payload = {
@@ -158,9 +158,8 @@ class AuthRepositoryAdapter(IAuthRepository):
         """Convert ORM model to domain entity."""
         return User(
             id=model.id,
-            email=model.email,
             name=model.name,
-            role=Role(model.role.value),
-            created_at=model.created_at,
-            updated_at=model.updated_at
+            email=model.email,
+            password=model.password,
+            role=model.role
         )

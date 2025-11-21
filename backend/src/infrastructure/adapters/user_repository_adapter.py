@@ -1,8 +1,7 @@
-import uuid
 from typing import Optional, List
-from domain.entities import User, Role
+from domain.entities import User
 from domain.repositories import IUserRepository
-from infrastructure.database import UserModel, RoleEnum
+from infrastructure.database import UserModel
 from infrastructure.database.db_config import db_config
 
 
@@ -12,7 +11,7 @@ class UserRepositoryAdapter(IUserRepository):
     def __init__(self):
         self.db = db_config
 
-    async def find_by_id(self, user_id: str) -> Optional[User]:
+    async def find_by_id(self, user_id: int) -> Optional[User]:
         """Find user by ID."""
         session = self.db.get_session()
         try:
@@ -35,11 +34,10 @@ class UserRepositoryAdapter(IUserRepository):
         session = self.db.get_session()
         try:
             user_model = UserModel(
-                id=user.id or str(uuid.uuid4()),
                 email=user.email,
                 name=user.name,
-                password_hash=password_hash,
-                role=RoleEnum(user.role.value)
+                password=password_hash,
+                role=user.role
             )
 
             session.add(user_model)
@@ -61,7 +59,7 @@ class UserRepositoryAdapter(IUserRepository):
 
             user_model.name = user.name
             user_model.email = user.email
-            user_model.role = RoleEnum(user.role.value)
+            user_model.role = user.role
 
             session.commit()
             session.refresh(user_model)
@@ -70,7 +68,7 @@ class UserRepositoryAdapter(IUserRepository):
         finally:
             session.close()
 
-    async def delete(self, user_id: str) -> None:
+    async def delete(self, user_id: int) -> None:
         """Delete user by ID."""
         session = self.db.get_session()
         try:
@@ -95,9 +93,8 @@ class UserRepositoryAdapter(IUserRepository):
         """Convert ORM model to domain entity."""
         return User(
             id=model.id,
-            email=model.email,
             name=model.name,
-            role=Role(model.role.value),
-            created_at=model.created_at,
-            updated_at=model.updated_at
+            email=model.email,
+            password=model.password,
+            role=model.role
         )
