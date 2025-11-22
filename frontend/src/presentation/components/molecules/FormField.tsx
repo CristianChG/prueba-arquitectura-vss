@@ -1,5 +1,4 @@
 import { Box, type BoxProps, type TextFieldProps } from "@mui/material";
-import { Label } from "@atoms/Label";
 import { Input } from "@atoms/Input";
 
 interface FormFieldProps extends Omit<BoxProps, "children"> {
@@ -21,11 +20,13 @@ export const FormField: React.FC<FormFieldProps> = ({
   sx,
   ...boxProps
 }) => (
-  <Box
-    sx={{ display: "flex", flexDirection: "column", gap: 1, ...sx }}
-    {...boxProps}
-  >
-    <Label text={label} required={required} optional={optional} error={error} />
-    <Input error={error} helperText={helperText} {...inputProps} />
+  <Box sx={sx} {...boxProps}>
+    <Input
+      label={optional ? `${label} (Opcional)` : label}
+      required={required}
+      error={error}
+      helperText={helperText}
+      {...inputProps}
+    />
   </Box>
 );

@@ -25,12 +25,14 @@ from domain.usecases import (
     LogoutUser,
     GetCurrentUser,
     RefreshTokenUseCase,
-    UploadDataset
+    UploadDataset,
+    GetAllUsers,
+    UpdateUserRole
 )
 
 # Presentation
-from presentation.controllers import AuthController, CowController, DatasetController
-from presentation.routes import create_auth_routes, create_cow_routes, create_dataset_routes
+from presentation.controllers import AuthController, CowController, DatasetController, UserController
+from presentation.routes import create_auth_routes, create_cow_routes, create_dataset_routes, create_user_routes
 from presentation.middleware import register_error_handlers
 
 # Utils
@@ -69,6 +71,8 @@ def create_app() -> Flask:
     get_current_user = GetCurrentUser(auth_repository)
     refresh_token_usecase = RefreshTokenUseCase(auth_repository)
     upload_dataset = UploadDataset(dataset_repository)
+    get_all_users = GetAllUsers(user_repository)
+    update_user_role = UpdateUserRole(user_repository)
 
     # Dependency Injection: Create controller instances
     auth_controller = AuthController(
@@ -83,11 +87,16 @@ def create_app() -> Flask:
         dataset_repository=dataset_repository,
         upload_dataset=upload_dataset
     )
+    user_controller = UserController(
+        get_all_users=get_all_users,
+        update_user_role=update_user_role
+    )
 
     # Register blueprints with injected controllers
     app.register_blueprint(create_auth_routes(auth_controller))
     app.register_blueprint(create_cow_routes(cow_controller))
     app.register_blueprint(create_dataset_routes(dataset_controller))
+    app.register_blueprint(create_user_routes(user_controller))
 
     # Register error handlers
     register_error_handlers(app)

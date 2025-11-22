@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from domain.entities import User
 from domain.repositories import IUserRepository
 from infrastructure.database import UserModel
@@ -80,12 +80,65 @@ class UserRepositoryAdapter(IUserRepository):
         finally:
             session.close()
 
-    async def find_all(self) -> List[User]:
-        """Get all users."""
+    async def find_all(
+        self,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        role: Optional[int] = None,
+        sort_by: Optional[str] = None,
+        sort_order: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get all users with pagination, filters, and sorting."""
         session = self.db.get_session()
         try:
-            user_models = session.query(UserModel).all()
-            return [self._model_to_entity(model) for model in user_models]
+            query = session.query(UserModel)
+
+            # Apply filters
+            if search:
+                search_pattern = f"%{search}%"
+                query = query.filter(
+                    (UserModel.name.ilike(search_pattern)) |
+                    (UserModel.email.ilike(search_pattern))
+                )
+
+            if role is not None:
+                query = query.filter(UserModel.role == role)
+
+            # Apply sorting
+            if sort_by and sort_order:
+                column_map = {
+                    'name': UserModel.name,
+                    'email': UserModel.email,
+                    'role': UserModel.role
+                }
+                if sort_by in column_map:
+                    column = column_map[sort_by]
+                    if sort_order.lower() == 'desc':
+                        query = query.order_by(column.desc())
+                    else:
+                        query = query.order_by(column.asc())
+            else:
+                # Default sorting by name ascending
+                query = query.order_by(UserModel.name.asc())
+
+            # Get total count
+            total = query.count()
+
+            # Apply pagination
+            offset = (page - 1) * limit
+            user_models = query.offset(offset).limit(limit).all()
+
+            # Calculate total pages
+            pages = (total + limit - 1) // limit if total > 0 else 0
+
+            return {
+                'users': [self._model_to_entity(model) for model in user_models],
+                'total': total,
+                'page': page,
+                'limit': limit,
+                'pages': pages
+            }
         finally:
             session.close()
 

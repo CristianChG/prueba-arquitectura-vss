@@ -1,19 +1,51 @@
 -- Database Initialization Script for Vacas Application
--- This script creates dummy data for testing and development purposes
+-- This script creates tables and dummy data for testing and development purposes
+
+-- Create tables if they don't exist
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    email VARCHAR UNIQUE NOT NULL,
+    password VARCHAR NOT NULL,
+    role INTEGER NOT NULL DEFAULT 3
+);
+
+CREATE TABLE IF NOT EXISTS cows (
+    id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS datasets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    cow_id INTEGER NOT NULL REFERENCES cows(id),
+    name VARCHAR NOT NULL,
+    blob_route VARCHAR NOT NULL,
+    upload_date TIMESTAMP NOT NULL,
+    cleaning_state VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS models (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    name VARCHAR NOT NULL,
+    description VARCHAR,
+    blob_route VARCHAR NOT NULL,
+    metadata JSONB
+);
+
+CREATE TABLE IF NOT EXISTS predictions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    cow_id INTEGER NOT NULL REFERENCES cows(id),
+    model_id INTEGER NOT NULL REFERENCES models(id),
+    dataset_id INTEGER NOT NULL REFERENCES datasets(id),
+    date TIMESTAMP NOT NULL,
+    result JSONB NOT NULL,
+    state VARCHAR NOT NULL
+);
 
 -- Clean up existing data (in reverse order of foreign key dependencies)
-TRUNCATE TABLE predictions CASCADE;
-TRUNCATE TABLE models CASCADE;
-TRUNCATE TABLE datasets CASCADE;
-TRUNCATE TABLE cows CASCADE;
-TRUNCATE TABLE users CASCADE;
-
--- Reset sequences for auto-increment IDs
-ALTER SEQUENCE users_id_seq RESTART WITH 1;
-ALTER SEQUENCE cows_id_seq RESTART WITH 1;
-ALTER SEQUENCE datasets_id_seq RESTART WITH 1;
-ALTER SEQUENCE models_id_seq RESTART WITH 1;
-ALTER SEQUENCE predictions_id_seq RESTART WITH 1;
+TRUNCATE TABLE predictions, models, datasets, cows, users RESTART IDENTITY CASCADE;
 
 -- Insert dummy users with bcrypt hashed passwords
 -- Password for all users: 'Password123'

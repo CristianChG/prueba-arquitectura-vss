@@ -4,7 +4,9 @@ import { ProtectedRoute } from "@routes/ProtectedRoute";
 import { LoginPage } from "@pages/LoginPage";
 import { RegisterPage } from "@pages/RegisterPage";
 import { DashboardPage } from "@pages/DashboardPage";
+import { UsersPage } from "@pages/UsersPage";
 import { APP_ROUTES } from "@constants/AppRoutes";
+import { ROLES } from "@constants/roles";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -21,6 +23,10 @@ export const AppRoutes: React.FC = () => {
         <Route
           path={APP_ROUTES.DASHBOARD}
           element={<ProtectedRoute element={<DashboardPage />} />}
+        />
+        <Route
+          path="/roles"
+          element={<ProtectedRoute element={<UsersPage />} requiredRole={ROLES.ADMIN} />}
         />
         <Route
           path={APP_ROUTES.ROOT}

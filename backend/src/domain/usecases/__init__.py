@@ -4,6 +4,8 @@ from .logout_user import LogoutUser
 from .get_current_user import GetCurrentUser
 from .refresh_token_usecase import RefreshTokenUseCase
 from .upload_dataset import UploadDataset
+from .get_all_users import GetAllUsers
+from .update_user_role import UpdateUserRole
 
 __all__ = [
     "LoginUser",
@@ -12,4 +14,6 @@ __all__ = [
     "GetCurrentUser",
     "RefreshTokenUseCase",
     "UploadDataset",
+    "GetAllUsers",
+    "UpdateUserRole",
 ]

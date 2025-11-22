@@ -25,7 +25,8 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
       leftIcon,
       rightIcon,
       type,
-      variant = "standard",
+      variant = "outlined",
+      size = "small",
       InputProps: inputProps,
       ...props
     },
@@ -39,6 +40,7 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
         helperText={helperText}
         type={isPassword ? "password" : type}
         variant={variant}
+        size={size}
         fullWidth
         InputProps={{
           startAdornment: leftIcon ? (

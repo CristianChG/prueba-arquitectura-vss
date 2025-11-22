@@ -79,3 +79,15 @@ def role_required(*allowed_roles):
 
         return decorated_function
     return decorator
+
+
+# Convenience decorators
+def require_auth(f):
+    """Decorator that requires authentication."""
+    return auth_required(f)
+
+
+def require_admin(f):
+    """Decorator that requires admin role."""
+    from utils.constants.roles import ROLE_ADMIN
+    return role_required(ROLE_ADMIN)(f)

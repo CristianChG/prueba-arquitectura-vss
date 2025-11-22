@@ -46,8 +46,8 @@ class AuthRepositoryAdapter(IAuthRepository):
                 raise ValueError(AuthMessages.INVALID_CREDENTIALS)
 
             # Generate tokens
-            access_token = self._create_access_token(user_model.id)
-            refresh_token = self._create_refresh_token(user_model.id)
+            access_token = self._create_access_token(user_model.id, user_model.role)
+            refresh_token = self._create_refresh_token(user_model.id, user_model.role)
 
             return AuthToken(
                 access_token=access_token,
@@ -98,9 +98,18 @@ class AuthRepositoryAdapter(IAuthRepository):
             if not user_id:
                 raise ValueError(AuthMessages.INVALID_TOKEN)
 
-            # Generate new tokens
-            access_token = self._create_access_token(user_id)
-            new_refresh_token = self._create_refresh_token(user_id)
+            # Get user to include role in token
+            session = self.db.get_session()
+            try:
+                user_model = session.query(UserModel).filter(UserModel.id == user_id).first()
+                if not user_model:
+                    raise ValueError(AuthMessages.USER_NOT_FOUND)
+
+                # Generate new tokens
+                access_token = self._create_access_token(user_id, user_model.role)
+                new_refresh_token = self._create_refresh_token(user_id, user_model.role)
+            finally:
+                session.close()
 
             return AuthToken(
                 access_token=access_token,
@@ -134,21 +143,23 @@ class AuthRepositoryAdapter(IAuthRepository):
         finally:
             session.close()
 
-    def _create_access_token(self, user_id: int) -> str:
+    def _create_access_token(self, user_id: int, role: int) -> str:
         """Create JWT access token."""
         expire = datetime.utcnow() + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = {
             "sub": user_id,
+            "role": role,
             "exp": expire,
             "type": "access"
         }
         return jwt.encode(payload, self.SECRET_KEY, algorithm=self.ALGORITHM)
 
-    def _create_refresh_token(self, user_id: int) -> str:
+    def _create_refresh_token(self, user_id: int, role: int) -> str:
         """Create JWT refresh token."""
         expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         payload = {
             "sub": user_id,
+            "role": role,
             "exp": expire,
             "type": "refresh"
         }
