@@ -5,6 +5,7 @@ import { LoginPage } from "@pages/LoginPage";
 import { RegisterPage } from "@pages/RegisterPage";
 import { DashboardPage } from "@pages/DashboardPage";
 import { UsersPage } from "@pages/UsersPage";
+import { NotFoundPage } from "@pages/NotFoundPage";
 import { APP_ROUTES } from "@constants/AppRoutes";
 import { ROLES } from "@constants/roles";
 
@@ -32,6 +33,7 @@ export const AppRoutes: React.FC = () => {
           path={APP_ROUTES.ROOT}
           element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
         />
+        <Route path="*" element={<ProtectedRoute element={<NotFoundPage />} />} />
       </Routes>
     </BrowserRouter>
   );

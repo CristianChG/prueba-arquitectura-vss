@@ -1,5 +1,5 @@
 export const APP_ROUTES = {
-  ROOT: "*",
+  ROOT: "/",
   LOGIN: "/login",
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
