@@ -3,4 +3,5 @@ export const APP_ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
+  PENDING_APPROVAL: "/pending-approval",
 };

@@ -110,7 +110,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       />
 
       <Button
-        label="Iniciar sesión"
+        label={isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
         type="submit"
         color="primary"
         isLoading={isLoading}

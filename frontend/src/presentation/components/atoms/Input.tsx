@@ -2,8 +2,10 @@ import {
   TextField,
   type TextFieldProps as MuiTextFieldProps,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface InputProps extends Omit<MuiTextFieldProps, "variant"> {
   label?: string;
@@ -32,13 +34,33 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
     },
     ref
   ) => {
+    const [showPassword, setShowPassword] = useState(false);
+    const isPasswordField = type === "password" || isPassword;
+
+    const handleTogglePassword = () => {
+      setShowPassword(!showPassword);
+    };
+
+    const passwordToggleIcon = isPasswordField ? (
+      <InputAdornment position="end">
+        <IconButton
+          onClick={handleTogglePassword}
+          edge="end"
+          tabIndex={-1}
+          aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+        >
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    ) : undefined;
+
     return (
       <TextField
         ref={ref}
         label={label}
         error={error}
         helperText={helperText}
-        type={isPassword ? "password" : type}
+        type={isPasswordField && !showPassword ? "password" : "text"}
         variant={variant}
         size={size}
         fullWidth
@@ -46,9 +68,7 @@ export const Input = forwardRef<HTMLDivElement, InputProps>(
           startAdornment: leftIcon ? (
             <InputAdornment position="start">{leftIcon}</InputAdornment>
           ) : undefined,
-          endAdornment: rightIcon ? (
-            <InputAdornment position="end">{rightIcon}</InputAdornment>
-          ) : undefined,
+          endAdornment: rightIcon || passwordToggleIcon,
           ...inputProps,
         }}
         {...props}

@@ -6,6 +6,7 @@ import { RegisterPage } from "@pages/RegisterPage";
 import { DashboardPage } from "@pages/DashboardPage";
 import { UsersPage } from "@pages/UsersPage";
 import { NotFoundPage } from "@pages/NotFoundPage";
+import { PendingApprovalPage } from "@pages/PendingApprovalPage";
 import { APP_ROUTES } from "@constants/AppRoutes";
 import { ROLES } from "@constants/roles";
 
@@ -22,6 +23,10 @@ export const AppRoutes: React.FC = () => {
           element={<AuthRoute element={<RegisterPage />} />}
         />
         <Route
+          path={APP_ROUTES.PENDING_APPROVAL}
+          element={<ProtectedRoute element={<PendingApprovalPage />} isPendingApprovalPage={true} />}
+        />
+        <Route
           path={APP_ROUTES.DASHBOARD}
           element={<ProtectedRoute element={<DashboardPage />} />}
         />
@@ -33,6 +38,7 @@ export const AppRoutes: React.FC = () => {
           path={APP_ROUTES.ROOT}
           element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
         />
+        <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<ProtectedRoute element={<NotFoundPage />} />} />
       </Routes>
     </BrowserRouter>

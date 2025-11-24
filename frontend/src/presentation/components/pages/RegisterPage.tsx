@@ -15,7 +15,7 @@ export const RegisterPage: React.FC = () => {
   ) => {
     try {
       await register(email, password, name);
-      navigate(APP_ROUTES.DASHBOARD);
+      // La navegación se maneja automáticamente por AuthRoute cuando isAuthenticated cambia
     } catch (err) {
       console.error("Registration error:", err);
     }

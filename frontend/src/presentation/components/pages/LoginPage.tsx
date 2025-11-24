@@ -11,7 +11,7 @@ export const LoginPage: React.FC = () => {
   const handleLogin = async (email: string, password: string) => {
     try {
       await login(email, password);
-      navigate(APP_ROUTES.DASHBOARD);
+      // La navegación se maneja automáticamente por AuthRoute cuando isAuthenticated cambia
     } catch (err) {
       console.error("Login error:", err);
     }
