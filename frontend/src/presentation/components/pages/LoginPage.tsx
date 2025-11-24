@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuth } from "@app/hooks/useAuth";
 import { LoginForm } from "@presentation/components/organisms/LoginForm";
 import { AuthTemplate } from "@presentation/components/templates/AuthTemplate";
@@ -6,7 +7,11 @@ import { APP_ROUTES } from "@constants/AppRoutes";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, error, isLoading } = useAuth();
+  const { login, error, isLoading, clearError } = useAuth();
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const handleLogin = async (email: string, password: string) => {
     try {

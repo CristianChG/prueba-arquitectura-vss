@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuth } from "@app/hooks/useAuth";
 import { RegisterForm } from "@presentation/components/organisms/RegisterForm";
 import { AuthTemplate } from "@presentation/components/templates/AuthTemplate";
@@ -6,7 +7,11 @@ import { APP_ROUTES } from "@constants/AppRoutes";
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register, error, isLoading } = useAuth();
+  const { register, error, isLoading, clearError } = useAuth();
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const handleRegister = async (
     email: string,
