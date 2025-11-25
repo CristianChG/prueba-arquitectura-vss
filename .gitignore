@@ -19,3 +19,7 @@ backend/__pycache__/
 # Claude
 .claude/
 CLAUDE.md
+
+# Uploads (ignore actual files but keep directory structure)
+uploads/**/*.csv
+!uploads/**/.gitkeep

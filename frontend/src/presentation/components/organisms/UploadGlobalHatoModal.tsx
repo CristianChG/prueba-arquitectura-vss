@@ -12,23 +12,13 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
-import Papa from 'papaparse';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { GlobalHatosAPI, type CreateGlobalHatoData } from '../../../infrastructure/api/GlobalHatosAPI';
+import { GlobalHatosAPI } from '../../../infrastructure/api/GlobalHatosAPI';
 
 interface UploadGlobalHatoModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-interface CSVRow {
-  'Número del animal': string;
-  'Nombre del grupo': string;
-  'Producción de leche ayer': string;
-  'Producción media diaria últimos 7 días': string;
-  'Estado de la reproducción': string;
-  'Días en ordeño': string;
 }
 
 export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
@@ -41,14 +31,14 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [parsedData, setParsedData] = useState<CreateGlobalHatoData['cows'] | null>(null);
+  const [warnings, setWarnings] = useState<{ message: string; invalid_rows: any[] } | null>(null);
 
   const handleReset = useCallback(() => {
     setNombre('');
     setFechaSnapshot('');
     setFile(null);
     setError(null);
-    setParsedData(null);
+    setWarnings(null);
     setUploading(false);
   }, []);
 
@@ -59,74 +49,14 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
     }
   }, [uploading, handleReset, onClose]);
 
-  const validateCSV = useCallback((data: CSVRow[]): boolean => {
-    const requiredColumns = [
-      'Número del animal',
-      'Nombre del grupo',
-      'Producción de leche ayer',
-      'Producción media diaria últimos 7 días',
-      'Estado de la reproducción',
-      'Días en ordeño',
-    ];
-
-    if (data.length === 0) {
-      setError('El archivo CSV está vacío');
-      return false;
-    }
-
-    const firstRow = data[0];
-    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
-
-    if (missingColumns.length > 0) {
-      setError(`Faltan las siguientes columnas: ${missingColumns.join(', ')}`);
-      return false;
-    }
-
-    return true;
-  }, []);
-
-  const parseCSV = useCallback((file: File) => {
-    Papa.parse<CSVRow>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        if (results.errors.length > 0) {
-          setError('Error al parsear el archivo CSV: ' + results.errors[0].message);
-          setParsedData(null);
-          return;
-        }
-
-        if (!validateCSV(results.data)) {
-          setParsedData(null);
-          return;
-        }
-
-        const cowsData = results.data.map(row => ({
-          numero_animal: row['Número del animal'],
-          nombre_grupo: row['Nombre del grupo'],
-          produccion_leche_ayer: parseFloat(row['Producción de leche ayer']) || 0,
-          produccion_media_7dias: parseFloat(row['Producción media diaria últimos 7 días']) || 0,
-          estado_reproduccion: row['Estado de la reproducción'],
-          dias_ordeno: parseInt(row['Días en ordeño']) || 0,
-        }));
-
-        setParsedData(cowsData);
-        setError(null);
-      },
-      error: (error) => {
-        setError('Error al leer el archivo: ' + error.message);
-        setParsedData(null);
-      },
-    });
-  }, [validateCSV]);
-
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const uploadedFile = acceptedFiles[0];
       setFile(uploadedFile);
-      parseCSV(uploadedFile);
+      setError(null);
+      setWarnings(null);
     }
-  }, [parseCSV]);
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -148,30 +78,32 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
       return;
     }
 
-    if (!parsedData || parsedData.length === 0) {
-      setError('Debes cargar un archivo CSV válido');
+    if (!file) {
+      setError('Debes cargar un archivo CSV');
       return;
     }
 
     try {
       setUploading(true);
       setError(null);
+      setWarnings(null);
 
-      await GlobalHatosAPI.createGlobalHato({
-        nombre,
-        fecha_snapshot: fechaSnapshot,
-        cows: parsedData,
-      });
+      const response = await GlobalHatosAPI.uploadCSV(nombre, fechaSnapshot, file);
+
+      // Check for warnings (invalid rows)
+      if (response.warnings) {
+        setWarnings(response.warnings);
+      }
 
       handleReset();
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear el archivo');
+      setError(err.response?.data?.error || 'Error al subir el archivo');
     } finally {
       setUploading(false);
     }
-  }, [nombre, fechaSnapshot, parsedData, handleReset, onSuccess, onClose]);
+  }, [nombre, fechaSnapshot, file, handleReset, onSuccess, onClose]);
 
   return (
     <Dialog
@@ -242,9 +174,23 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
           </Box>
 
           {/* File Info */}
-          {parsedData && (
+          {file && !error && (
             <Alert severity="success">
-              Archivo cargado correctamente: {parsedData.length} animales detectados
+              Archivo seleccionado: {file.name}
+            </Alert>
+          )}
+
+          {/* Warning Alert */}
+          {warnings && (
+            <Alert severity="warning" onClose={() => setWarnings(null)}>
+              <Typography variant="body2" fontWeight="bold" gutterBottom>
+                {warnings.message}
+              </Typography>
+              {warnings.invalid_rows.length > 0 && (
+                <Typography variant="caption">
+                  Mostrando {Math.min(warnings.invalid_rows.length, 10)} de {warnings.invalid_rows.length} filas con errores
+                </Typography>
+              )}
             </Alert>
           )}
 
@@ -266,7 +212,7 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={uploading || !parsedData}
+          disabled={uploading || !file}
         >
           {uploading ? 'Subiendo...' : 'Subir'}
         </Button>

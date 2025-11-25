@@ -21,6 +21,7 @@ import {
   Button,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
 import { GlobalHatosAPI, type GlobalHato, type Pagination } from '../../../infrastructure/api/GlobalHatosAPI';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -117,6 +118,32 @@ export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange
     }
   }, [deleteDialog.globalHato, loadGlobalHatos, handleDeleteCancel, onDataChange]);
 
+  const handleDownload = useCallback(async (globalHato: GlobalHato) => {
+    if (!globalHato.blob_route) return;
+
+    try {
+      const blob = await GlobalHatosAPI.downloadCSV(globalHato.id);
+
+      // Create blob URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Extract filename from blob_route or use a default
+      const filename = globalHato.blob_route.split('/').pop() || `${globalHato.nombre}.csv`;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  }, []);
+
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'dd/MM/yyyy', { locale: es });
@@ -209,10 +236,21 @@ export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange
                   <TableCell>{globalHato.grupos_detectados} grupos</TableCell>
                   <TableCell>{formatDateTime(globalHato.created_at)}</TableCell>
                   <TableCell align="right">
+                    {globalHato.blob_route && (
+                      <IconButton
+                        onClick={() => handleDownload(globalHato)}
+                        size="small"
+                        color="primary"
+                        title="Descargar CSV"
+                      >
+                        <DownloadIcon />
+                      </IconButton>
+                    )}
                     <IconButton
                       onClick={() => handleDeleteClick(globalHato)}
                       size="small"
                       color="error"
+                      title="Eliminar"
                     >
                       <DeleteIcon />
                     </IconButton>

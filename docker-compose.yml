@@ -7,6 +7,8 @@ services:
     depends_on:
       - redis
       - db
+    volumes:
+      - ./uploads:/app/uploads
     networks: [vacasnet]
 
   celery:
@@ -16,6 +18,8 @@ services:
     depends_on:
       - redis
       - backend
+    volumes:
+      - ./uploads:/app/uploads
     networks: [vacasnet]
 
   redis:

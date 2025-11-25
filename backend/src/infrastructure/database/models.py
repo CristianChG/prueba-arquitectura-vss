@@ -33,6 +33,7 @@ class GlobalHatoModel(Base):
     fecha_snapshot = Column(DateTime, nullable=False)
     total_animales = Column(Integer, nullable=False)
     grupos_detectados = Column(Integer, nullable=False)
+    blob_route = Column(String, nullable=True)
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     # Relationships

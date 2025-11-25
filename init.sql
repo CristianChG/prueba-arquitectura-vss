@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS global_hato (
     fecha_snapshot DATE NOT NULL,
     total_animales INTEGER NOT NULL,
     grupos_detectados INTEGER NOT NULL,
+    blob_route VARCHAR,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

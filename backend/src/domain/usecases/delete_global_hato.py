@@ -1,5 +1,6 @@
 """Use case for deleting a Global Hato snapshot."""
 from domain.repositories import IGlobalHatoRepository
+from infrastructure.storage import local_storage_service
 
 
 class DeleteGlobalHato:
@@ -27,6 +28,16 @@ class DeleteGlobalHato:
 
         if global_hato.user_id != user_id:
             raise ValueError("Unauthorized: Global Hato belongs to another user")
+
+        # Delete file from disk if it exists
+        if global_hato.blob_route:
+            try:
+                deleted = local_storage_service.delete_file(global_hato.blob_route)
+                if not deleted:
+                    print(f"Warning: Could not delete file {global_hato.blob_route}")
+            except Exception as e:
+                # Log but don't fail - database cleanup more important
+                print(f"Error deleting file {global_hato.blob_route}: {str(e)}")
 
         # Delete Global Hato (CASCADE will delete cows)
         await self.global_hato_repository.delete(global_hato_id, user_id)

@@ -19,6 +19,7 @@ export interface GlobalHato {
   total_animales: number;
   grupos_detectados: number;
   created_at: string; // ISO datetime string
+  blob_route?: string; // Optional: path to CSV file
 }
 
 export interface Pagination {
@@ -79,5 +80,34 @@ export class GlobalHatosAPI {
 
   static async deleteGlobalHato(id: number): Promise<void> {
     await axiosInstance.delete(`${this.BASE_PATH}/${id}`);
+  }
+
+  static async uploadCSV(
+    nombre: string,
+    fechaSnapshot: string,
+    file: File
+  ): Promise<GlobalHato & { warnings?: { message: string; invalid_rows: any[] } }> {
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('fecha_snapshot', fechaSnapshot);
+    formData.append('file', file);
+
+    const response = await axiosInstance.post<GlobalHato & { warnings?: { message: string; invalid_rows: any[] } }>(
+      `${this.BASE_PATH}/upload-csv`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  }
+
+  static async downloadCSV(id: number): Promise<Blob> {
+    const response = await axiosInstance.get(`${this.BASE_PATH}/${id}/download`, {
+      responseType: 'blob',
+    });
+    return response.data;
   }
 }

@@ -27,6 +27,7 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                 fecha_snapshot=global_hato.fecha_snapshot,
                 total_animales=global_hato.total_animales,
                 grupos_detectados=global_hato.grupos_detectados,
+                blob_route=global_hato.blob_route,
                 created_at=global_hato.created_at
             )
 
@@ -146,5 +147,6 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
             fecha_snapshot=model.fecha_snapshot.date() if hasattr(model.fecha_snapshot, 'date') else model.fecha_snapshot,
             total_animales=model.total_animales,
             grupos_detectados=model.grupos_detectados,
-            created_at=model.created_at
+            created_at=model.created_at,
+            blob_route=model.blob_route
         )

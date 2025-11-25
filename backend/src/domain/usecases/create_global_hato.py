@@ -1,5 +1,5 @@
 """Use case for creating a new Global Hato snapshot."""
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import date, datetime
 from domain.repositories import IGlobalHatoRepository
 from domain.entities import GlobalHato, Cow
@@ -16,7 +16,8 @@ class CreateGlobalHato:
         user_id: int,
         nombre: str,
         fecha_snapshot: date,
-        cows_data: List[Dict[str, Any]]
+        cows_data: List[Dict[str, Any]],
+        blob_route: Optional[str] = None
     ) -> GlobalHato:
         """
         Execute create Global Hato use case.
@@ -26,6 +27,7 @@ class CreateGlobalHato:
             nombre: Name of the snapshot
             fecha_snapshot: Date of the snapshot
             cows_data: List of cow dictionaries with parsed CSV data
+            blob_route: Optional path to uploaded CSV file
 
         Returns:
             Created GlobalHato entity
@@ -56,7 +58,8 @@ class CreateGlobalHato:
             fecha_snapshot=fecha_snapshot,
             total_animales=total_animales,
             grupos_detectados=grupos_detectados,
-            created_at=datetime.now()
+            created_at=datetime.now(),
+            blob_route=blob_route
         )
 
         # Create Cow entities

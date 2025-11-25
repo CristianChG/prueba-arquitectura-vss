@@ -1,6 +1,7 @@
 """Global Hato domain entity."""
 from dataclasses import dataclass
 from datetime import datetime, date
+from typing import Optional
 
 
 @dataclass
@@ -13,3 +14,4 @@ class GlobalHato:
     total_animales: int
     grupos_detectados: int
     created_at: datetime
+    blob_route: Optional[str] = None
