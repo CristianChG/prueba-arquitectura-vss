@@ -35,7 +35,7 @@ class GlobalHatoController:
         }
 
     async def get_global_hatos(self):
-        """Handle get all Global Hato snapshots request with pagination and sorting."""
+        """Handle get all Global Hato snapshots request with pagination, sorting, and filters."""
         try:
             user_id = request.user_id
 
@@ -44,10 +44,13 @@ class GlobalHatoController:
             limit = request.args.get('limit', 10, type=int)
             sort_by = request.args.get('sort_by', None, type=str)
             sort_order = request.args.get('sort_order', None, type=str)
+            search = request.args.get('search', None, type=str)
+            fecha_desde = request.args.get('fecha_desde', None, type=str)
+            fecha_hasta = request.args.get('fecha_hasta', None, type=str)
 
             # Execute use case
             result = await self.get_all_global_hatos.execute(
-                user_id, page, limit, sort_by, sort_order
+                user_id, page, limit, sort_by, sort_order, search, fecha_desde, fecha_hasta
             )
 
             # Format response

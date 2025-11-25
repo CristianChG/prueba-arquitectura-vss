@@ -11,7 +11,6 @@ import {
   Box,
   Typography,
   TablePagination,
-  LinearProgress,
   TableSortLabel,
   Dialog,
   DialogTitle,
@@ -27,10 +26,18 @@ import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface GlobalHatosTableProps {
+  search: string;
+  fechaDesde: string;
+  fechaHasta: string;
   onDataChange?: () => void;
 }
 
-export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange }) => {
+export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({
+  search,
+  fechaDesde,
+  fechaHasta,
+  onDataChange
+}) => {
   const [globalHatos, setGlobalHatos] = useState<GlobalHato[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<Pagination>({
@@ -57,6 +64,9 @@ export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange
         limit: pagination.limit,
         sortBy: orderBy,
         sortOrder: order,
+        search: search || undefined,
+        fechaDesde: fechaDesde || undefined,
+        fechaHasta: fechaHasta || undefined,
       });
       setGlobalHatos(data.global_hatos);
       setPagination(data.pagination);
@@ -65,11 +75,16 @@ export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, orderBy, order]);
+  }, [pagination.page, pagination.limit, orderBy, order, search, fechaDesde, fechaHasta]);
 
   useEffect(() => {
     loadGlobalHatos();
   }, [loadGlobalHatos]);
+
+  // Reset pagination to page 1 when filters change
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  }, [search, fechaDesde, fechaHasta]);
 
   const handleChangePage = useCallback((_event: unknown, newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage + 1 }));
@@ -162,11 +177,6 @@ export const GlobalHatosTable: React.FC<GlobalHatosTableProps> = ({ onDataChange
 
   return (
     <Box>
-      {/* Loading indicator */}
-      <Box sx={{ width: '100%', height: 4, mb: 2 }}>
-        {loading ? <LinearProgress /> : <Box sx={{ height: 4 }} />}
-      </Box>
-
       {/* Table */}
       <TableContainer
         component={Paper}

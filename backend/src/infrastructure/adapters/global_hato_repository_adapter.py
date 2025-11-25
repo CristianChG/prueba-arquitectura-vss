@@ -65,14 +65,29 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
         page: int = 1,
         limit: int = 10,
         sort_by: Optional[str] = None,
-        sort_order: Optional[str] = None
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        fecha_desde: Optional[str] = None,
+        fecha_hasta: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Get all Global Hato snapshots for a user with pagination and sorting."""
+        """Get all Global Hato snapshots for a user with pagination, sorting, and filters."""
         session = self.db.get_session()
         try:
             query = session.query(GlobalHatoModel).filter(
                 GlobalHatoModel.user_id == user_id
             )
+
+            # Apply search filter
+            if search:
+                query = query.filter(
+                    GlobalHatoModel.nombre.ilike(f'%{search}%')
+                )
+
+            # Apply date filters
+            if fecha_desde:
+                query = query.filter(GlobalHatoModel.fecha_snapshot >= fecha_desde)
+            if fecha_hasta:
+                query = query.filter(GlobalHatoModel.fecha_snapshot <= fecha_hasta)
 
             # Apply sorting
             if sort_by and sort_order:

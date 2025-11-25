@@ -20,10 +20,13 @@ class IGlobalHatoRepository(Protocol):
         page: int = 1,
         limit: int = 10,
         sort_by: Optional[str] = None,
-        sort_order: Optional[str] = None
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        fecha_desde: Optional[str] = None,
+        fecha_hasta: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Get all Global Hato snapshots for a user with pagination and sorting.
+        Get all Global Hato snapshots for a user with pagination, sorting, and filters.
 
         Returns:
             Dict with 'global_hatos', 'total', 'page', 'limit', 'pages'

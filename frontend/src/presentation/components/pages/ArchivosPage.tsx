@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { DashboardTemplate } from '../templates/DashboardTemplate';
 import { GlobalHatosTable } from '../organisms/GlobalHatosTable';
+import { GlobalHatosTableFilters } from '../molecules/GlobalHatosTableFilters';
 import { UploadGlobalHatoModal } from '../organisms/UploadGlobalHatoModal';
 import { Typography, Button, Box } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -8,6 +9,9 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 export const ArchivosPage = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [tableKey, setTableKey] = useState(0);
+  const [search, setSearch] = useState('');
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
 
   const handleOpenUploadModal = useCallback(() => {
     setUploadModalOpen(true);
@@ -47,7 +51,22 @@ export const ArchivosPage = () => {
         </Button>
       </Box>
 
-      <GlobalHatosTable key={tableKey} onDataChange={handleUploadSuccess} />
+      <GlobalHatosTableFilters
+        search={search}
+        fechaDesde={fechaDesde}
+        fechaHasta={fechaHasta}
+        onSearchChange={setSearch}
+        onFechaDesdeChange={setFechaDesde}
+        onFechaHastaChange={setFechaHasta}
+      />
+
+      <GlobalHatosTable
+        key={tableKey}
+        search={search}
+        fechaDesde={fechaDesde}
+        fechaHasta={fechaHasta}
+        onDataChange={handleUploadSuccess}
+      />
 
       <UploadGlobalHatoModal
         open={uploadModalOpen}

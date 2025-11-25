@@ -34,6 +34,9 @@ export interface GetGlobalHatosParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  search?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
 }
 
 export interface GetGlobalHatosResponse {
@@ -64,6 +67,9 @@ export class GlobalHatosAPI {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.sortBy) queryParams.append('sort_by', params.sortBy);
     if (params?.sortOrder) queryParams.append('sort_order', params.sortOrder);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.fechaDesde) queryParams.append('fecha_desde', params.fechaDesde);
+    if (params?.fechaHasta) queryParams.append('fecha_hasta', params.fechaHasta);
 
     const url = queryParams.toString()
       ? `${this.BASE_PATH}?${queryParams.toString()}`
