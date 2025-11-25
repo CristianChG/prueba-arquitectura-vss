@@ -15,7 +15,8 @@ from infrastructure.adapters import (
     AuthRepositoryAdapter,
     UserRepositoryAdapter,
     CowRepositoryAdapter,
-    DatasetRepositoryAdapter
+    DatasetRepositoryAdapter,
+    GlobalHatoRepositoryAdapter
 )
 
 # Domain Use Cases
@@ -27,12 +28,15 @@ from domain.usecases import (
     RefreshTokenUseCase,
     UploadDataset,
     GetAllUsers,
-    UpdateUserRole
+    UpdateUserRole,
+    CreateGlobalHato,
+    GetAllGlobalHatos,
+    DeleteGlobalHato
 )
 
 # Presentation
-from presentation.controllers import AuthController, CowController, DatasetController, UserController
-from presentation.routes import create_auth_routes, create_cow_routes, create_dataset_routes, create_user_routes
+from presentation.controllers import AuthController, CowController, DatasetController, UserController, GlobalHatoController
+from presentation.routes import create_auth_routes, create_cow_routes, create_dataset_routes, create_user_routes, create_global_hato_routes
 from presentation.middleware import register_error_handlers
 
 # Utils
@@ -63,6 +67,7 @@ def create_app() -> Flask:
     user_repository = UserRepositoryAdapter()
     cow_repository = CowRepositoryAdapter()
     dataset_repository = DatasetRepositoryAdapter()
+    global_hato_repository = GlobalHatoRepositoryAdapter()
 
     # Dependency Injection: Create use case instances
     login_user = LoginUser(auth_repository)
@@ -73,6 +78,9 @@ def create_app() -> Flask:
     upload_dataset = UploadDataset(dataset_repository)
     get_all_users = GetAllUsers(user_repository)
     update_user_role = UpdateUserRole(user_repository)
+    create_global_hato = CreateGlobalHato(global_hato_repository)
+    get_all_global_hatos = GetAllGlobalHatos(global_hato_repository)
+    delete_global_hato = DeleteGlobalHato(global_hato_repository)
 
     # Dependency Injection: Create controller instances
     auth_controller = AuthController(
@@ -91,12 +99,18 @@ def create_app() -> Flask:
         get_all_users=get_all_users,
         update_user_role=update_user_role
     )
+    global_hato_controller = GlobalHatoController(
+        create_global_hato=create_global_hato,
+        get_all_global_hatos=get_all_global_hatos,
+        delete_global_hato=delete_global_hato
+    )
 
     # Register blueprints with injected controllers
     app.register_blueprint(create_auth_routes(auth_controller))
     app.register_blueprint(create_cow_routes(cow_controller))
     app.register_blueprint(create_dataset_routes(dataset_controller))
     app.register_blueprint(create_user_routes(user_controller))
+    app.register_blueprint(create_global_hato_routes(global_hato_controller))
 
     # Register error handlers
     register_error_handlers(app)

@@ -6,6 +6,9 @@ from .refresh_token_usecase import RefreshTokenUseCase
 from .upload_dataset import UploadDataset
 from .get_all_users import GetAllUsers
 from .update_user_role import UpdateUserRole
+from .create_global_hato import CreateGlobalHato
+from .get_all_global_hatos import GetAllGlobalHatos
+from .delete_global_hato import DeleteGlobalHato
 
 __all__ = [
     "LoginUser",
@@ -16,4 +19,7 @@ __all__ = [
     "UploadDataset",
     "GetAllUsers",
     "UpdateUserRole",
+    "CreateGlobalHato",
+    "GetAllGlobalHatos",
+    "DeleteGlobalHato",
 ]

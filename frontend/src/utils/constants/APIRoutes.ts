@@ -6,4 +6,5 @@ export const API_ROUTES = {
   REFRESH_TOKEN: "/api/auth/refresh",
   GET_CURRENT_USER: "/api/auth/me",
   DASHBOARD: "/api/dashboard",
+  GLOBAL_HATOS: "/api/global-hatos",
 };

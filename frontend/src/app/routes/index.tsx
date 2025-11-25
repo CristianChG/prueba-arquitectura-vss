@@ -5,6 +5,7 @@ import { LoginPage } from "@pages/LoginPage";
 import { RegisterPage } from "@pages/RegisterPage";
 import { DashboardPage } from "@pages/DashboardPage";
 import { UsersPage } from "@pages/UsersPage";
+import { ArchivosPage } from "@pages/ArchivosPage";
 import { NotFoundPage } from "@pages/NotFoundPage";
 import { PendingApprovalPage } from "@pages/PendingApprovalPage";
 import { APP_ROUTES } from "@constants/AppRoutes";
@@ -29,6 +30,10 @@ export const AppRoutes: React.FC = () => {
         <Route
           path={APP_ROUTES.DASHBOARD}
           element={<ProtectedRoute element={<DashboardPage />} />}
+        />
+        <Route
+          path={APP_ROUTES.ARCHIVOS}
+          element={<ProtectedRoute element={<ArchivosPage />} />}
         />
         <Route
           path="/roles"

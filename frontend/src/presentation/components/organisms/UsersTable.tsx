@@ -14,7 +14,6 @@ import {
   Box,
   Typography,
   TablePagination,
-  LinearProgress,
   TableSortLabel,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -161,11 +160,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ search, roleFilter }) =>
 
   return (
     <Box>
-      {/* Loading indicator */}
-      <Box sx={{ width: '100%', height: 4, mb: 2 }}>
-        {loading ? <LinearProgress /> : <Box sx={{ height: 4 }} />}
-      </Box>
-
       {/* Table */}
       <TableContainer
         component={Paper}

@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage = 'Dashboard' }) => 
 
   const navItems = [
     { label: 'Dashboard', icon: <HomeIcon />, path: APP_ROUTES.DASHBOARD },
-    { label: 'Archivos', icon: <FolderIcon />, path: '/archivos' },
+    { label: 'Archivos', icon: <FolderIcon />, path: APP_ROUTES.ARCHIVOS },
     { label: 'Roles y Personas', icon: <PeopleIcon />, path: '/roles', adminOnly: true },
   ];
 

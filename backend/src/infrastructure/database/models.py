@@ -16,19 +16,46 @@ class UserModel(Base):
     role = Column(Integer, nullable=False, default=3)  # 1=ADMIN, 2=COLAB, 3=PENDING_APPROVAL
 
     # Relationships
+    global_hatos = relationship("GlobalHatoModel", back_populates="uploader", cascade="all, delete-orphan")
     datasets = relationship("DatasetModel", back_populates="uploader", cascade="all, delete-orphan")
     models = relationship("ModelModel", back_populates="uploader", cascade="all, delete-orphan")
     predictions = relationship("PredictionModel", back_populates="user", cascade="all, delete-orphan")
 
 
+class GlobalHatoModel(Base):
+    """SQLAlchemy ORM model for Global Hato snapshots."""
+
+    __tablename__ = "global_hato"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    nombre = Column(String, nullable=False)
+    fecha_snapshot = Column(DateTime, nullable=False)
+    total_animales = Column(Integer, nullable=False)
+    grupos_detectados = Column(Integer, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    uploader = relationship("UserModel", back_populates="global_hatos")
+    cows = relationship("CowModel", back_populates="global_hato", cascade="all, delete-orphan")
+
+
 class CowModel(Base):
-    """SQLAlchemy ORM model for cows."""
+    """SQLAlchemy ORM model for cows with Global Hato snapshot fields."""
 
     __tablename__ = "cows"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    global_hato_id = Column(Integer, ForeignKey("global_hato.id"), nullable=True)
+    numero_animal = Column(String, nullable=True)
+    nombre_grupo = Column(String, nullable=True)
+    produccion_leche_ayer = Column(Integer, nullable=True)  # Using Integer for NUMERIC
+    produccion_media_7dias = Column(Integer, nullable=True)
+    estado_reproduccion = Column(String, nullable=True)
+    dias_ordeno = Column(Integer, nullable=True)
 
     # Relationships
+    global_hato = relationship("GlobalHatoModel", back_populates="cows")
     datasets = relationship("DatasetModel", back_populates="cow", cascade="all, delete-orphan")
     predictions = relationship("PredictionModel", back_populates="cow", cascade="all, delete-orphan")
 
