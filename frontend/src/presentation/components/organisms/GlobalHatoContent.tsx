@@ -5,11 +5,11 @@ import type { Cow } from '../../../infrastructure/api/GlobalHatosAPI';
 import { CowsTableFilters } from '../molecules/CowsTableFilters';
 import { CowsTable } from './CowsTable';
 
-interface AtributosContentProps {
+interface GlobalHatoContentProps {
   selectedSnapshotId: number | '';
 }
 
-export const AtributosContent: React.FC<AtributosContentProps> = ({ selectedSnapshotId }) => {
+export const GlobalHatoContent: React.FC<GlobalHatoContentProps> = ({ selectedSnapshotId }) => {
   // State
   const [search, setSearch] = useState('');
   const [grupoFilter, setGrupoFilter] = useState('');

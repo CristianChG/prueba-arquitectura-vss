@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { DashboardTemplate } from '../templates/DashboardTemplate';
 import { TabsContainer, type TabItem } from '../organisms/TabsContainer';
 import { TableroContent } from '../organisms/TableroContent';
-import { AtributosContent } from '../organisms/AtributosContent';
+import { GlobalHatoContent } from '../organisms/GlobalHatoContent';
+import { DistribucionesContent } from '../organisms/DistribucionesContent';
 import { SnapshotSelector } from '../molecules/SnapshotSelector';
 import { Typography, Box, Alert, Skeleton } from '@mui/material';
 import { GlobalHatosAPI, type GlobalHato } from '../../../infrastructure/api/GlobalHatosAPI';
@@ -46,8 +47,12 @@ export const DashboardPage = () => {
       content: <TableroContent selectedSnapshotId={selectedSnapshotId} />,
     },
     {
-      label: 'ATRIBUTOS',
-      content: <AtributosContent selectedSnapshotId={selectedSnapshotId} />,
+      label: 'GLOBAL HATO',
+      content: <GlobalHatoContent selectedSnapshotId={selectedSnapshotId} />,
+    },
+    {
+      label: 'DISTRIBUCIONES',
+      content: <DistribucionesContent selectedSnapshotId={selectedSnapshotId} />,
     },
   ];
 
