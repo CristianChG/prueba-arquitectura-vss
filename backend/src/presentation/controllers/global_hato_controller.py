@@ -17,12 +17,14 @@ class GlobalHatoController:
         create_global_hato: CreateGlobalHato,
         get_all_global_hatos: GetAllGlobalHatos,
         delete_global_hato: DeleteGlobalHato,
-        get_corrales_by_snapshot: 'GetCorralesBySnapshot'
+        get_corrales_by_snapshot: 'GetCorralesBySnapshot',
+        get_cows_by_group: 'GetCowsByGroup'
     ):
         self.create_global_hato = create_global_hato
         self.get_all_global_hatos = get_all_global_hatos
         self.delete_global_hato = delete_global_hato
         self.get_corrales_by_snapshot = get_corrales_by_snapshot
+        self.get_cows_by_group = get_cows_by_group
 
     def _serialize_global_hato(self, global_hato):
         """Serialize GlobalHato entity to JSON."""
@@ -340,4 +342,29 @@ class GlobalHatoController:
             ]), 200
         except Exception as e:
             print(f"Error getting corrales: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_cows_by_group_endpoint(self, global_hato_id: int, nombre_grupo: str):
+        """Handle get cows by group request."""
+        try:
+            user_id = request.user_id
+
+            # Execute use case
+            cows = await self.get_cows_by_group.execute(global_hato_id, user_id, nombre_grupo)
+
+            # Serialize response
+            return jsonify([
+                {
+                    "id": cow.id,
+                    "numero_animal": cow.numero_animal,
+                    "nombre_grupo": cow.nombre_grupo,
+                    "produccion_leche_ayer": cow.produccion_leche_ayer,
+                    "produccion_media_7dias": cow.produccion_media_7dias,
+                    "estado_reproduccion": cow.estado_reproduccion,
+                    "dias_ordeno": cow.dias_ordeno
+                }
+                for cow in cows
+            ]), 200
+        except Exception as e:
+            print(f"Error getting cows by group: {str(e)}")
             return jsonify({"error": "Internal server error"}), 500

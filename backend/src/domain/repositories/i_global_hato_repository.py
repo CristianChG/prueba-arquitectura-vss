@@ -41,6 +41,10 @@ class IGlobalHatoRepository(Protocol):
         """Get aggregated corral data for a snapshot."""
         ...
 
+    async def get_cows_by_group(self, global_hato_id: int, user_id: int, nombre_grupo: str) -> List[Cow]:
+        """Get cows for a specific group in a snapshot."""
+        ...
+
     async def delete(self, global_hato_id: int, user_id: int) -> None:
         """Delete Global Hato snapshot and all associated cows (with user ownership check)."""
         ...

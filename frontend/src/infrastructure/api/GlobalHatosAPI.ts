@@ -129,4 +129,11 @@ export class GlobalHatosAPI {
     const response = await axiosInstance.get<Corral[]>(`${this.BASE_PATH}/${id}/corrales`);
     return response.data;
   }
+
+  static async getCowsByGroup(id: number, nombreGrupo: string): Promise<Cow[]> {
+    const response = await axiosInstance.get<Cow[]>(
+      `${this.BASE_PATH}/${id}/grupos/${encodeURIComponent(nombreGrupo)}/vacas`
+    );
+    return response.data;
+  }
 }

@@ -195,6 +195,41 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
         finally:
             session.close()
 
+    async def get_cows_by_group(self, global_hato_id: int, user_id: int, nombre_grupo: str) -> List[Cow]:
+        """Get cows for a specific group in a snapshot with user ownership verification."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return []
+
+            # Query cows by group
+            cow_models = session.query(CowModel).filter(
+                CowModel.global_hato_id == global_hato_id,
+                CowModel.nombre_grupo == nombre_grupo
+            ).all()
+
+            return [
+                Cow(
+                    id=cow.id,
+                    global_hato_id=cow.global_hato_id,
+                    numero_animal=cow.numero_animal,
+                    nombre_grupo=cow.nombre_grupo,
+                    produccion_leche_ayer=cow.produccion_leche_ayer,
+                    produccion_media_7dias=cow.produccion_media_7dias,
+                    estado_reproduccion=cow.estado_reproduccion,
+                    dias_ordeno=cow.dias_ordeno
+                )
+                for cow in cow_models
+            ]
+        finally:
+            session.close()
+
     def _model_to_entity(self, model: GlobalHatoModel) -> GlobalHato:
         """Convert ORM model to domain entity."""
         return GlobalHato(

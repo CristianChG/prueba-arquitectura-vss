@@ -10,6 +10,7 @@ from .create_global_hato import CreateGlobalHato
 from .get_all_global_hatos import GetAllGlobalHatos
 from .delete_global_hato import DeleteGlobalHato
 from .get_corrales_by_snapshot import GetCorralesBySnapshot
+from .get_cows_by_group import GetCowsByGroup
 
 __all__ = [
     "LoginUser",
@@ -24,4 +25,5 @@ __all__ = [
     "GetAllGlobalHatos",
     "DeleteGlobalHato",
     "GetCorralesBySnapshot",
+    "GetCowsByGroup",
 ]

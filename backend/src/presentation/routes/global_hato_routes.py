@@ -38,6 +38,12 @@ def create_global_hato_routes(global_hato_controller):
         """Get corrales (groups) for a Global Hato snapshot."""
         return asyncio.run(global_hato_controller.get_corrales_endpoint(global_hato_id))
 
+    @global_hato_bp.route('/<int:global_hato_id>/grupos/<string:nombre_grupo>/vacas', methods=['GET'])
+    @require_auth
+    def get_cows_by_group(global_hato_id, nombre_grupo):
+        """Get cows for a specific group in a Global Hato snapshot."""
+        return asyncio.run(global_hato_controller.get_cows_by_group_endpoint(global_hato_id, nombre_grupo))
+
     @global_hato_bp.route('/<int:global_hato_id>', methods=['DELETE'])
     @require_auth
     def delete_global_hato(global_hato_id):

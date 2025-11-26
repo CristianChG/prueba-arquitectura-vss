@@ -32,7 +32,8 @@ from domain.usecases import (
     CreateGlobalHato,
     GetAllGlobalHatos,
     DeleteGlobalHato,
-    GetCorralesBySnapshot
+    GetCorralesBySnapshot,
+    GetCowsByGroup
 )
 
 # Presentation
@@ -83,6 +84,7 @@ def create_app() -> Flask:
     get_all_global_hatos = GetAllGlobalHatos(global_hato_repository)
     delete_global_hato = DeleteGlobalHato(global_hato_repository)
     get_corrales_by_snapshot = GetCorralesBySnapshot(global_hato_repository)
+    get_cows_by_group = GetCowsByGroup(global_hato_repository)
 
     # Dependency Injection: Create controller instances
     auth_controller = AuthController(
@@ -105,7 +107,8 @@ def create_app() -> Flask:
         create_global_hato=create_global_hato,
         get_all_global_hatos=get_all_global_hatos,
         delete_global_hato=delete_global_hato,
-        get_corrales_by_snapshot=get_corrales_by_snapshot
+        get_corrales_by_snapshot=get_corrales_by_snapshot,
+        get_cows_by_group=get_cows_by_group
     )
 
     # Register blueprints with injected controllers
