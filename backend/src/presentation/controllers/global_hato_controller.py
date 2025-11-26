@@ -1,6 +1,7 @@
 """Global Hato controller with dependency injection."""
 from flask import jsonify, request, send_file
 from datetime import datetime
+from typing import Optional
 from domain.usecases import CreateGlobalHato, GetAllGlobalHatos, DeleteGlobalHato
 from infrastructure.storage import local_storage_service
 from werkzeug.utils import secure_filename
@@ -204,6 +205,25 @@ class GlobalHatoController:
                             "error": f"Missing required columns: {', '.join(missing)}"
                         }), 400
 
+                    # Helper functions to safely parse numeric values
+                    def safe_float(value: str) -> Optional[float]:
+                        """Convert string to float, return None if empty."""
+                        if not value or not value.strip():
+                            return None
+                        try:
+                            return float(value)
+                        except ValueError:
+                            raise  # Re-raise to be caught by main exception handler
+
+                    def safe_int(value: str) -> Optional[int]:
+                        """Convert string to int, return None if empty."""
+                        if not value or not value.strip():
+                            return None
+                        try:
+                            return int(value)
+                        except ValueError:
+                            raise  # Re-raise to be caught by main exception handler
+
                     # Parse each row
                     for row_num, row in enumerate(reader, start=2):  # Start at 2 (1=header)
                         try:
@@ -211,15 +231,17 @@ class GlobalHatoController:
                             cow_data = {
                                 'numero_animal': str(row['Número del animal']).strip(),
                                 'nombre_grupo': str(row['Nombre del grupo']).strip(),
-                                'produccion_leche_ayer': float(row['Producción de leche ayer']),
-                                'produccion_media_7dias': float(row['Producción media diaria últimos 7 días']),
+                                'produccion_leche_ayer': safe_float(row['Producción de leche ayer']),
+                                'produccion_media_7dias': safe_float(row['Producción media diaria últimos 7 días']),
                                 'estado_reproduccion': str(row['Estado de la reproducción']).strip(),
-                                'dias_ordeno': int(row['Días en ordeño'])
+                                'dias_ordeno': safe_int(row['Días en ordeño'])
                             }
 
-                            # Basic validation
+                            # Validate required fields
                             if not cow_data['numero_animal']:
                                 raise ValueError("Número del animal is required")
+                            if not cow_data['nombre_grupo']:
+                                raise ValueError("Nombre del grupo is required")
 
                             valid_cows.append(cow_data)
 

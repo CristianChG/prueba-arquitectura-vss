@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -11,6 +11,12 @@ import {
   CircularProgress,
   Box,
   TableSortLabel,
+  TextField,
+  TablePagination,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import type { Cow } from '../../../infrastructure/api/GlobalHatosAPI';
 
@@ -24,16 +30,77 @@ type OrderBy = 'numero_animal' | 'produccion_leche_ayer' | 'produccion_media_7di
 export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
   const [orderBy, setOrderBy] = useState<OrderBy>('numero_animal');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [search, setSearch] = useState('');
+  const [estadoReproductivoFilter, setEstadoReproductivoFilter] = useState<string>('');
+  const [page, setPage] = useState(0); // MUI uses 0-based indexing
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const handleRequestSort = (property: OrderBy) => {
+  // Reset state when cows data changes (e.g., switching groups)
+  useEffect(() => {
+    setPage(0);
+    setSearch('');
+    setEstadoReproductivoFilter('');
+  }, [cows]);
+
+  const handleRequestSort = useCallback((property: OrderBy) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-  };
+    setPage(0); // Reset to first page when sorting
+  }, [orderBy, order]);
 
-  // Sort cows array based on orderBy and order
-  const sortedCows = useMemo(() => {
-    return [...cows].sort((a, b) => {
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(0); // Reset to first page when searching
+  }, []);
+
+  const handleEstadoReproductivoChange = useCallback((event: any) => {
+    setEstadoReproductivoFilter(event.target.value);
+    setPage(0); // Reset to first page when filtering
+  }, []);
+
+  const handleChangePage = useCallback((_event: unknown, newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to first page when changing rows per page
+  }, []);
+
+  // Get unique reproductive states for the dropdown
+  const uniqueEstadosReproductivos = useMemo(() => {
+    const estados = new Set<string>();
+    cows.forEach(cow => {
+      if (cow.estado_reproduccion) {
+        estados.add(cow.estado_reproduccion);
+      }
+    });
+    return Array.from(estados).sort();
+  }, [cows]);
+
+  // Process cows: filter, sort, and paginate
+  const processedCows = useMemo(() => {
+    // Step 1: Filter by search and reproductive state
+    let filtered = cows;
+
+    // Filter by animal number search
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(cow =>
+        cow.numero_animal.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filter by reproductive state
+    if (estadoReproductivoFilter) {
+      filtered = filtered.filter(cow =>
+        cow.estado_reproduccion === estadoReproductivoFilter
+      );
+    }
+
+    // Step 2: Sort (existing logic)
+    const sorted = [...filtered].sort((a, b) => {
       let aValue = a[orderBy];
       let bValue = b[orderBy];
 
@@ -56,7 +123,16 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
       }
       return 0;
     });
-  }, [cows, orderBy, order]);
+
+    // Step 3: Paginate
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+
+    return {
+      data: sorted.slice(startIndex, endIndex),
+      total: filtered.length,
+    };
+  }, [cows, search, estadoReproductivoFilter, orderBy, order, page, rowsPerPage]);
 
   if (loading) {
     return (
@@ -67,13 +143,43 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
   }
 
   return (
-    <TableContainer
-      component={Paper}
-      elevation={0}
-      sx={{
-        backgroundColor: 'transparent',
-      }}
-    >
+    <>
+      {/* Search and Filter */}
+      <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+        <TextField
+          size="small"
+          placeholder="Buscar por número de animal..."
+          value={search}
+          onChange={handleSearchChange}
+          sx={{ flex: 1 }}
+        />
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="estado-reproductivo-label">Estado reproductivo</InputLabel>
+          <Select
+            labelId="estado-reproductivo-label"
+            value={estadoReproductivoFilter}
+            onChange={handleEstadoReproductivoChange}
+            label="Estado reproductivo"
+          >
+            <MenuItem value="">
+              <em>Todos</em>
+            </MenuItem>
+            {uniqueEstadosReproductivos.map((estado) => (
+              <MenuItem key={estado} value={estado}>
+                {estado}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          backgroundColor: 'transparent',
+        }}
+      >
       <Table sx={{ tableLayout: 'fixed' }}>
         <TableHead>
           <TableRow sx={{ backgroundColor: 'transparent' }}>
@@ -125,16 +231,18 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedCows.length === 0 ? (
+          {processedCows.data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} align="center">
                 <Typography color="text.secondary" sx={{ py: 2 }}>
-                  No hay vacas en este grupo
+                  {search || estadoReproductivoFilter
+                    ? 'No se encontraron vacas con los filtros aplicados'
+                    : 'No hay vacas en este grupo'}
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            sortedCows.map((cow) => (
+            processedCows.data.map((cow) => (
               <TableRow key={cow.id} hover>
                 <TableCell>{cow.numero_animal}</TableCell>
                 <TableCell>
@@ -150,6 +258,22 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
           )}
         </TableBody>
       </Table>
+
+      {/* Pagination */}
+      <TablePagination
+        component="div"
+        count={processedCows.total}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[10, 25, 50]}
+        labelRowsPerPage="Filas por página:"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+        }
+      />
     </TableContainer>
+    </>
   );
 };

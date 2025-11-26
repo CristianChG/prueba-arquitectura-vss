@@ -69,10 +69,10 @@ class CreateGlobalHato:
                 global_hato_id=0,  # Will be set after global_hato creation
                 numero_animal=str(cow.get('numero_animal', '')),
                 nombre_grupo=str(cow.get('nombre_grupo', '')),
-                produccion_leche_ayer=float(cow.get('produccion_leche_ayer', 0)),
-                produccion_media_7dias=float(cow.get('produccion_media_7dias', 0)),
+                produccion_leche_ayer=float(cow['produccion_leche_ayer']) if cow.get('produccion_leche_ayer') is not None else None,
+                produccion_media_7dias=float(cow['produccion_media_7dias']) if cow.get('produccion_media_7dias') is not None else None,
                 estado_reproduccion=str(cow.get('estado_reproduccion', '')),
-                dias_ordeno=int(cow.get('dias_ordeno', 0))
+                dias_ordeno=int(cow['dias_ordeno']) if cow.get('dias_ordeno') is not None else None
             )
             for cow in cows_data
         ]

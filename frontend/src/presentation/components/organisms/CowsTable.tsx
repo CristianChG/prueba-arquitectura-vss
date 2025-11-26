@@ -186,10 +186,14 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                 <TableRow key={cow.id} hover>
                   <TableCell>{cow.numero_animal}</TableCell>
                   <TableCell>{cow.nombre_grupo}</TableCell>
-                  <TableCell>{Number(cow.produccion_leche_ayer ?? 0).toFixed(2)} kg</TableCell>
-                  <TableCell>{Number(cow.produccion_media_7dias ?? 0).toFixed(2)} kg</TableCell>
+                  <TableCell>
+                    {cow.produccion_leche_ayer != null ? `${Number(cow.produccion_leche_ayer).toFixed(2)} kg` : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {cow.produccion_media_7dias != null ? `${Number(cow.produccion_media_7dias).toFixed(2)} kg` : '-'}
+                  </TableCell>
                   <TableCell>{cow.estado_reproduccion}</TableCell>
-                  <TableCell>{cow.dias_ordeno ?? 0}</TableCell>
+                  <TableCell>{cow.dias_ordeno ?? '-'}</TableCell>
                 </TableRow>
               ))
             )}

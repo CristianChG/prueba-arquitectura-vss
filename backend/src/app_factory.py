@@ -59,8 +59,14 @@ def create_app() -> Flask:
     app.config['SECRET_KEY'] = app_config.SECRET_KEY
     app.config['MAX_CONTENT_LENGTH'] = app_config.MAX_CONTENT_LENGTH
 
-    # Configure CORS
-    CORS(app, origins=app_config.CORS_ORIGINS)
+    # Configure CORS with support for preflight requests
+    CORS(
+        app,
+        origins=app_config.CORS_ORIGINS,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+        supports_credentials=True
+    )
 
     # Initialize database
     db_config.create_all_tables()
