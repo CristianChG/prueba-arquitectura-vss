@@ -9,6 +9,7 @@ from .update_user_role import UpdateUserRole
 from .create_global_hato import CreateGlobalHato
 from .get_all_global_hatos import GetAllGlobalHatos
 from .delete_global_hato import DeleteGlobalHato
+from .get_corrales_by_snapshot import GetCorralesBySnapshot
 
 __all__ = [
     "LoginUser",
@@ -22,4 +23,5 @@ __all__ = [
     "CreateGlobalHato",
     "GetAllGlobalHatos",
     "DeleteGlobalHato",
+    "GetCorralesBySnapshot",
 ]

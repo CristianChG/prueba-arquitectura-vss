@@ -22,6 +22,14 @@ export interface GlobalHato {
   blob_route?: string; // Optional: path to CSV file
 }
 
+export interface Corral {
+  nombre_grupo: string;
+  total_animales: number;
+  produccion_promedio: number;
+  produccion_total: number;
+  produccion_promedio_7dias: number;
+}
+
 export interface Pagination {
   total: number;
   page: number;
@@ -114,6 +122,11 @@ export class GlobalHatosAPI {
     const response = await axiosInstance.get(`${this.BASE_PATH}/${id}/download`, {
       responseType: 'blob',
     });
+    return response.data;
+  }
+
+  static async getCorralesBySnapshot(id: number): Promise<Corral[]> {
+    const response = await axiosInstance.get<Corral[]>(`${this.BASE_PATH}/${id}/corrales`);
     return response.data;
   }
 }

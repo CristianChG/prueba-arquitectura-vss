@@ -1,6 +1,7 @@
 """Global Hato repository adapter using SQLAlchemy."""
 from typing import Optional, List, Dict, Any
-from domain.entities import GlobalHato, Cow
+from sqlalchemy import func
+from domain.entities import GlobalHato, Cow, CorralGroup
 from domain.repositories import IGlobalHatoRepository
 from infrastructure.database import GlobalHatoModel, CowModel
 from infrastructure.database.db_config import db_config
@@ -150,6 +151,47 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
             if global_hato_model:
                 session.delete(global_hato_model)
                 session.commit()
+        finally:
+            session.close()
+
+    async def get_corrales_by_snapshot(self, global_hato_id: int, user_id: int) -> List[CorralGroup]:
+        """Get aggregated corral data for a snapshot with user ownership verification."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return []
+
+            # Aggregate query
+            results = session.query(
+                CowModel.nombre_grupo,
+                func.count(CowModel.id).label('total_animales'),
+                func.avg(CowModel.produccion_leche_ayer).label('produccion_promedio'),
+                func.sum(CowModel.produccion_leche_ayer).label('produccion_total'),
+                func.avg(CowModel.produccion_media_7dias).label('produccion_promedio_7dias')
+            ).filter(
+                CowModel.global_hato_id == global_hato_id,
+                CowModel.nombre_grupo.isnot(None),
+                CowModel.nombre_grupo != ''
+            ).group_by(
+                CowModel.nombre_grupo
+            ).all()
+
+            return [
+                CorralGroup(
+                    nombre_grupo=row.nombre_grupo,
+                    total_animales=row.total_animales,
+                    produccion_promedio=round(float(row.produccion_promedio or 0), 2),
+                    produccion_total=round(float(row.produccion_total or 0), 2),
+                    produccion_promedio_7dias=round(float(row.produccion_promedio_7dias or 0), 2)
+                )
+                for row in results
+            ]
         finally:
             session.close()
 

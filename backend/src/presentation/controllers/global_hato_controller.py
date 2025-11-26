@@ -16,11 +16,13 @@ class GlobalHatoController:
         self,
         create_global_hato: CreateGlobalHato,
         get_all_global_hatos: GetAllGlobalHatos,
-        delete_global_hato: DeleteGlobalHato
+        delete_global_hato: DeleteGlobalHato,
+        get_corrales_by_snapshot: 'GetCorralesBySnapshot'
     ):
         self.create_global_hato = create_global_hato
         self.get_all_global_hatos = get_all_global_hatos
         self.delete_global_hato = delete_global_hato
+        self.get_corrales_by_snapshot = get_corrales_by_snapshot
 
     def _serialize_global_hato(self, global_hato):
         """Serialize GlobalHato entity to JSON."""
@@ -315,4 +317,27 @@ class GlobalHatoController:
 
         except Exception as e:
             print(f"Error downloading CSV: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_corrales_endpoint(self, global_hato_id: int):
+        """Handle get corrales by snapshot request."""
+        try:
+            user_id = request.user_id
+
+            # Execute use case
+            corrales = await self.get_corrales_by_snapshot.execute(global_hato_id, user_id)
+
+            # Serialize response
+            return jsonify([
+                {
+                    "nombre_grupo": corral.nombre_grupo,
+                    "total_animales": corral.total_animales,
+                    "produccion_promedio": corral.produccion_promedio,
+                    "produccion_total": corral.produccion_total,
+                    "produccion_promedio_7dias": corral.produccion_promedio_7dias
+                }
+                for corral in corrales
+            ]), 200
+        except Exception as e:
+            print(f"Error getting corrales: {str(e)}")
             return jsonify({"error": "Internal server error"}), 500
