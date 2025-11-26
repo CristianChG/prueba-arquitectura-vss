@@ -66,7 +66,7 @@ export const DashboardPage = () => {
         </Typography>
 
         {loadingSnapshots ? (
-          <Skeleton variant="rectangular" height={56} sx={{ maxWidth: 300, width: 300 }} />
+          <Skeleton variant="rectangular" height={40} sx={{ minWidth: 300, width: 300 }} />
         ) : snapshots.length > 0 ? (
           <SnapshotSelector
             snapshots={snapshots}

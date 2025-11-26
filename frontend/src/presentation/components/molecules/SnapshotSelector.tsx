@@ -15,7 +15,7 @@ export const SnapshotSelector: React.FC<SnapshotSelectorProps> = ({
   formatDate,
 }) => {
   return (
-    <FormControl sx={{ mb: 3, maxWidth: 300 }} fullWidth>
+    <FormControl size="small" sx={{ minWidth: 300 }}>
       <InputLabel>Archivo Global Hato</InputLabel>
       <Select
         value={selectedSnapshotId}
