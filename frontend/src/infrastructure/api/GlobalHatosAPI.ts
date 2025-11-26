@@ -65,6 +65,20 @@ export interface CreateGlobalHatoData {
   }>;
 }
 
+export interface GetCowsParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  nombreGrupo?: string;
+}
+
+export interface GetCowsResponse {
+  cows: Cow[];
+  pagination: Pagination;
+}
+
 export class GlobalHatosAPI {
   private static BASE_PATH = '/api/global-hatos';
 
@@ -134,6 +148,24 @@ export class GlobalHatosAPI {
     const response = await axiosInstance.get<Cow[]>(
       `${this.BASE_PATH}/${id}/grupos/${encodeURIComponent(nombreGrupo)}/vacas`
     );
+    return response.data;
+  }
+
+  static async getAllCowsBySnapshot(snapshotId: number, params?: GetCowsParams): Promise<GetCowsResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sort_by', params.sortBy);
+    if (params?.sortOrder) queryParams.append('sort_order', params.sortOrder);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.nombreGrupo) queryParams.append('nombre_grupo', params.nombreGrupo);
+
+    const url = queryParams.toString()
+      ? `${this.BASE_PATH}/${snapshotId}/vacas?${queryParams.toString()}`
+      : `${this.BASE_PATH}/${snapshotId}/vacas`;
+
+    const response = await axiosInstance.get<GetCowsResponse>(url);
     return response.data;
   }
 }

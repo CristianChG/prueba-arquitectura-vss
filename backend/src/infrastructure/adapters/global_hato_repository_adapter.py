@@ -230,6 +230,109 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
         finally:
             session.close()
 
+    async def get_all_cows_by_snapshot(
+        self,
+        global_hato_id: int,
+        user_id: int,
+        page: int = 1,
+        limit: int = 10,
+        sort_by: Optional[str] = None,
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        nombre_grupo: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get all cows for a snapshot with pagination, sorting, and filtering."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return {
+                    'cows': [],
+                    'total': 0,
+                    'page': page,
+                    'limit': limit,
+                    'pages': 0
+                }
+
+            # Base query
+            query = session.query(CowModel).filter(
+                CowModel.global_hato_id == global_hato_id
+            )
+
+            # Apply search filter (partial match on multiple columns)
+            if search:
+                search_pattern = f'%{search}%'
+                query = query.filter(
+                    (CowModel.numero_animal.ilike(search_pattern)) |
+                    (CowModel.nombre_grupo.ilike(search_pattern)) |
+                    (CowModel.estado_reproduccion.ilike(search_pattern))
+                )
+
+            # Apply group filter (exact match)
+            if nombre_grupo:
+                query = query.filter(CowModel.nombre_grupo == nombre_grupo)
+
+            # Apply sorting
+            if sort_by and sort_order:
+                column_map = {
+                    'id': CowModel.id,
+                    'numero_animal': CowModel.numero_animal,
+                    'nombre_grupo': CowModel.nombre_grupo,
+                    'produccion_leche_ayer': CowModel.produccion_leche_ayer,
+                    'produccion_media_7dias': CowModel.produccion_media_7dias,
+                    'estado_reproduccion': CowModel.estado_reproduccion,
+                    'dias_ordeno': CowModel.dias_ordeno
+                }
+                if sort_by in column_map:
+                    column = column_map[sort_by]
+                    if sort_order.lower() == 'desc':
+                        query = query.order_by(column.desc())
+                    else:
+                        query = query.order_by(column.asc())
+            else:
+                # Default sorting by id ascending
+                query = query.order_by(CowModel.id.asc())
+
+            # Get total count
+            total = query.count()
+
+            # Apply pagination
+            offset = (page - 1) * limit
+            cow_models = query.offset(offset).limit(limit).all()
+
+            # Calculate total pages
+            pages = (total + limit - 1) // limit if total > 0 else 0
+
+            # Convert to entities
+            cows = [
+                Cow(
+                    id=cow.id,
+                    global_hato_id=cow.global_hato_id,
+                    numero_animal=cow.numero_animal,
+                    nombre_grupo=cow.nombre_grupo,
+                    produccion_leche_ayer=cow.produccion_leche_ayer,
+                    produccion_media_7dias=cow.produccion_media_7dias,
+                    estado_reproduccion=cow.estado_reproduccion,
+                    dias_ordeno=cow.dias_ordeno
+                )
+                for cow in cow_models
+            ]
+
+            return {
+                'cows': cows,
+                'total': total,
+                'page': page,
+                'limit': limit,
+                'pages': pages
+            }
+        finally:
+            session.close()
+
     def _model_to_entity(self, model: GlobalHatoModel) -> GlobalHato:
         """Convert ORM model to domain entity."""
         return GlobalHato(

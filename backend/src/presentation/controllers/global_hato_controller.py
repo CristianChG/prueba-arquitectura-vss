@@ -18,13 +18,15 @@ class GlobalHatoController:
         get_all_global_hatos: GetAllGlobalHatos,
         delete_global_hato: DeleteGlobalHato,
         get_corrales_by_snapshot: 'GetCorralesBySnapshot',
-        get_cows_by_group: 'GetCowsByGroup'
+        get_cows_by_group: 'GetCowsByGroup',
+        get_all_cows_by_snapshot: 'GetAllCowsBySnapshot'
     ):
         self.create_global_hato = create_global_hato
         self.get_all_global_hatos = get_all_global_hatos
         self.delete_global_hato = delete_global_hato
         self.get_corrales_by_snapshot = get_corrales_by_snapshot
         self.get_cows_by_group = get_cows_by_group
+        self.get_all_cows_by_snapshot = get_all_cows_by_snapshot
 
     def _serialize_global_hato(self, global_hato):
         """Serialize GlobalHato entity to JSON."""
@@ -367,4 +369,54 @@ class GlobalHatoController:
             ]), 200
         except Exception as e:
             print(f"Error getting cows by group: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_all_cows_endpoint(self, global_hato_id: int):
+        """Handle get all cows for a snapshot request with pagination, sorting, and filters."""
+        try:
+            user_id = request.user_id
+
+            # Get query parameters
+            page = request.args.get('page', 1, type=int)
+            limit = request.args.get('limit', 10, type=int)
+            sort_by = request.args.get('sort_by', None, type=str)
+            sort_order = request.args.get('sort_order', None, type=str)
+            search = request.args.get('search', None, type=str)
+            nombre_grupo = request.args.get('nombre_grupo', None, type=str)
+
+            # Execute use case
+            result = await self.get_all_cows_by_snapshot.execute(
+                global_hato_id,
+                user_id,
+                page,
+                limit,
+                sort_by,
+                sort_order,
+                search,
+                nombre_grupo
+            )
+
+            # Serialize response
+            return jsonify({
+                "cows": [
+                    {
+                        "id": cow.id,
+                        "numero_animal": cow.numero_animal,
+                        "nombre_grupo": cow.nombre_grupo,
+                        "produccion_leche_ayer": cow.produccion_leche_ayer,
+                        "produccion_media_7dias": cow.produccion_media_7dias,
+                        "estado_reproduccion": cow.estado_reproduccion,
+                        "dias_ordeno": cow.dias_ordeno
+                    }
+                    for cow in result['cows']
+                ],
+                "pagination": {
+                    "total": result['total'],
+                    "page": result['page'],
+                    "limit": result['limit'],
+                    "pages": result['pages']
+                }
+            }), 200
+        except Exception as e:
+            print(f"Error getting all cows for snapshot: {str(e)}")
             return jsonify({"error": "Internal server error"}), 500
