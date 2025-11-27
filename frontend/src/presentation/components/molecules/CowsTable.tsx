@@ -183,7 +183,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
       <Table sx={{ tableLayout: 'fixed' }}>
         <TableHead>
           <TableRow sx={{ backgroundColor: 'transparent' }}>
-            <TableCell sx={{ fontWeight: 600, width: '20%' }}>
+            <TableCell sx={{ fontWeight: 600, width: '15%' }}>
               <TableSortLabel
                 active={orderBy === 'numero_animal'}
                 direction={orderBy === 'numero_animal' ? order : 'asc'}
@@ -192,7 +192,10 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
                 Número
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '20%' }}>
+            <TableCell sx={{ fontWeight: 600, width: '15%' }}>
+              Núm. Selección
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, width: '18%' }}>
               <TableSortLabel
                 active={orderBy === 'produccion_leche_ayer'}
                 direction={orderBy === 'produccion_leche_ayer' ? order : 'asc'}
@@ -201,7 +204,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
                 Producción ayer (L)
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '20%' }}>
+            <TableCell sx={{ fontWeight: 600, width: '18%' }}>
               <TableSortLabel
                 active={orderBy === 'produccion_media_7dias'}
                 direction={orderBy === 'produccion_media_7dias' ? order : 'asc'}
@@ -210,7 +213,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
                 Promedio 7 días (L)
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '25%' }}>
+            <TableCell sx={{ fontWeight: 600, width: '20%' }}>
               <TableSortLabel
                 active={orderBy === 'estado_reproduccion'}
                 direction={orderBy === 'estado_reproduccion' ? order : 'asc'}
@@ -219,7 +222,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
                 Estado reproducción
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '15%' }}>
+            <TableCell sx={{ fontWeight: 600, width: '14%' }}>
               <TableSortLabel
                 active={orderBy === 'dias_ordeno'}
                 direction={orderBy === 'dias_ordeno' ? order : 'asc'}
@@ -233,7 +236,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
         <TableBody>
           {processedCows.data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} align="center">
+              <TableCell colSpan={6} align="center">
                 <Typography color="text.secondary" sx={{ py: 2 }}>
                   {search || estadoReproductivoFilter
                     ? 'No se encontraron vacas con los filtros aplicados'
@@ -245,6 +248,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
             processedCows.data.map((cow) => (
               <TableRow key={cow.id} hover>
                 <TableCell>{cow.numero_animal}</TableCell>
+                <TableCell>{cow.numero_seleccion ?? '-'}</TableCell>
                 <TableCell>
                   {cow.produccion_leche_ayer != null ? Number(cow.produccion_leche_ayer).toFixed(2) : '-'}
                 </TableCell>

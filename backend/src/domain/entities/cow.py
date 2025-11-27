@@ -13,3 +13,4 @@ class Cow:
     produccion_media_7dias: Optional[float] = None
     estado_reproduccion: Optional[str] = None
     dias_ordeno: Optional[int] = None
+    numero_seleccion: Optional[str] = None

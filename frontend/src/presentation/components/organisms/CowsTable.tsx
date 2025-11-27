@@ -116,7 +116,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'transparent' }}>
-              <TableCell sx={{ fontWeight: 600, width: '14%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '12%' }}>
                 <TableSortLabel
                   active={orderBy === 'numero_animal'}
                   direction={orderBy === 'numero_animal' ? order : 'asc'}
@@ -125,7 +125,16 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Número Animal
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, width: '14%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '12%' }}>
+                <TableSortLabel
+                  active={orderBy === 'numero_seleccion'}
+                  direction={orderBy === 'numero_seleccion' ? order : 'asc'}
+                  onClick={() => handleRequestSort('numero_seleccion')}
+                >
+                  Número Selección
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '12%' }}>
                 <TableSortLabel
                   active={orderBy === 'nombre_grupo'}
                   direction={orderBy === 'nombre_grupo' ? order : 'asc'}
@@ -134,7 +143,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Grupo
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, width: '14%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '13%' }}>
                 <TableSortLabel
                   active={orderBy === 'produccion_leche_ayer'}
                   direction={orderBy === 'produccion_leche_ayer' ? order : 'asc'}
@@ -143,7 +152,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Producción Ayer
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, width: '16%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '13%' }}>
                 <TableSortLabel
                   active={orderBy === 'produccion_media_7dias'}
                   direction={orderBy === 'produccion_media_7dias' ? order : 'asc'}
@@ -152,7 +161,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Media 7 Días
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, width: '18%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '16%' }}>
                 <TableSortLabel
                   active={orderBy === 'estado_reproduccion'}
                   direction={orderBy === 'estado_reproduccion' ? order : 'asc'}
@@ -161,7 +170,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Estado Reproductivo
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, width: '14%' }}>
+              <TableCell sx={{ fontWeight: 600, width: '12%' }}>
                 <TableSortLabel
                   active={orderBy === 'dias_ordeno'}
                   direction={orderBy === 'dias_ordeno' ? order : 'asc'}
@@ -175,7 +184,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
           <TableBody>
             {cows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   <Typography color="text.secondary" sx={{ py: 2 }}>
                     {loading ? 'Cargando...' : 'No hay vacas disponibles'}
                   </Typography>
@@ -185,6 +194,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
               cows.map((cow) => (
                 <TableRow key={cow.id} hover>
                   <TableCell>{cow.numero_animal}</TableCell>
+                  <TableCell>{cow.numero_seleccion ?? '-'}</TableCell>
                   <TableCell>{cow.nombre_grupo}</TableCell>
                   <TableCell>
                     {cow.produccion_leche_ayer != null ? `${Number(cow.produccion_leche_ayer).toFixed(2)} kg` : '-'}

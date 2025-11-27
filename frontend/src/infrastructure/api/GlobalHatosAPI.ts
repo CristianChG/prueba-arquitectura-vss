@@ -9,6 +9,7 @@ export interface Cow {
   produccion_media_7dias: number;
   estado_reproduccion: string;
   dias_ordeno: number;
+  numero_seleccion?: string;
 }
 
 export interface GlobalHato {

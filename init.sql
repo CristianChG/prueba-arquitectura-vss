@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS cows (
     produccion_leche_ayer NUMERIC(10, 2),
     produccion_media_7dias NUMERIC(10, 2),
     estado_reproduccion VARCHAR,
-    dias_ordeno INTEGER
+    dias_ordeno INTEGER,
+    numero_seleccion VARCHAR
 );
 
 -- Indexes for performance

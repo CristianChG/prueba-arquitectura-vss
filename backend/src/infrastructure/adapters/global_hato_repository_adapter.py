@@ -44,7 +44,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_leche_ayer=cow.produccion_leche_ayer,
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
-                    dias_ordeno=cow.dias_ordeno
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion
                 )
                 for cow in cows
             ]
@@ -223,7 +224,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_leche_ayer=cow.produccion_leche_ayer,
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
-                    dias_ordeno=cow.dias_ordeno
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion
                 )
                 for cow in cow_models
             ]
@@ -286,7 +288,9 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     'produccion_leche_ayer': CowModel.produccion_leche_ayer,
                     'produccion_media_7dias': CowModel.produccion_media_7dias,
                     'estado_reproduccion': CowModel.estado_reproduccion,
-                    'dias_ordeno': CowModel.dias_ordeno
+                    'estado_reproduccion': CowModel.estado_reproduccion,
+                    'dias_ordeno': CowModel.dias_ordeno,
+                    'numero_seleccion': CowModel.numero_seleccion
                 }
                 if sort_by in column_map:
                     column = column_map[sort_by]
@@ -318,7 +322,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_leche_ayer=cow.produccion_leche_ayer,
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
-                    dias_ordeno=cow.dias_ordeno
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion
                 )
                 for cow in cow_models
             ]

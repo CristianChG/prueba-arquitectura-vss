@@ -184,8 +184,17 @@ class GlobalHatoController:
                 invalid_rows = []
 
                 with open(temp_path, 'r', encoding='utf-8-sig') as csvfile:  # utf-8-sig handles BOM
-                    # Read CSV
-                    reader = csv.DictReader(csvfile)
+                    # Detect delimiter (CSV vs TSV)
+                    sample = csvfile.read(1024)
+                    csvfile.seek(0)
+                    sniffer = csv.Sniffer()
+                    try:
+                        delimiter = sniffer.sniff(sample).delimiter
+                    except:
+                        delimiter = ','  # Default to comma if detection fails
+
+                    # Read CSV/TSV
+                    reader = csv.DictReader(csvfile, delimiter=delimiter)
 
                     # Expected columns (Spanish headers from UploadGlobalHatoModal.tsx)
                     expected_columns = {
@@ -194,7 +203,8 @@ class GlobalHatoController:
                         'Producción de leche ayer',
                         'Producción media diaria últimos 7 días',
                         'Estado de la reproducción',
-                        'Días en ordeño'
+                        'Días en ordeño',
+                        'Número(s) de selección de animal'
                     }
 
                     # Check headers
@@ -227,6 +237,17 @@ class GlobalHatoController:
                     # Parse each row
                     for row_num, row in enumerate(reader, start=2):  # Start at 2 (1=header)
                         try:
+                            # Helper to safely parse string field
+                            def safe_str(value: str) -> Optional[str]:
+                                """Convert to string and return None if empty."""
+                                if not value or str(value).strip() == '':
+                                    return None
+                                return str(value).strip()
+
+                            # Debug: print first few rows
+                            if row_num <= 5:
+                                print(f"DEBUG Row {row_num}: numero_seleccion raw = '{row.get('Número(s) de selección de animal', 'KEY_NOT_FOUND')}'")
+
                             # Validate and parse row
                             cow_data = {
                                 'numero_animal': str(row['Número del animal']).strip(),
@@ -234,8 +255,14 @@ class GlobalHatoController:
                                 'produccion_leche_ayer': safe_float(row['Producción de leche ayer']),
                                 'produccion_media_7dias': safe_float(row['Producción media diaria últimos 7 días']),
                                 'estado_reproduccion': str(row['Estado de la reproducción']).strip(),
-                                'dias_ordeno': safe_int(row['Días en ordeño'])
+                                'dias_ordeno': safe_int(row['Días en ordeño']),
+                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal', ''))
                             }
+
+                            # Debug: print parsed value
+                            if row_num <= 5:
+                                print(f"DEBUG Row {row_num}: numero_seleccion parsed = '{cow_data['numero_seleccion']}'")
+
 
                             # Validate required fields
                             if not cow_data['numero_animal']:
@@ -385,7 +412,8 @@ class GlobalHatoController:
                     "produccion_leche_ayer": cow.produccion_leche_ayer,
                     "produccion_media_7dias": cow.produccion_media_7dias,
                     "estado_reproduccion": cow.estado_reproduccion,
-                    "dias_ordeno": cow.dias_ordeno
+                    "dias_ordeno": cow.dias_ordeno,
+                    "numero_seleccion": cow.numero_seleccion
                 }
                 for cow in cows
             ]), 200
@@ -428,7 +456,8 @@ class GlobalHatoController:
                         "produccion_leche_ayer": cow.produccion_leche_ayer,
                         "produccion_media_7dias": cow.produccion_media_7dias,
                         "estado_reproduccion": cow.estado_reproduccion,
-                        "dias_ordeno": cow.dias_ordeno
+                        "dias_ordeno": cow.dias_ordeno,
+                        "numero_seleccion": cow.numero_seleccion
                     }
                     for cow in result['cows']
                 ],
