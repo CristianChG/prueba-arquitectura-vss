@@ -109,6 +109,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         }}
       />
 
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <a href="/forgot-password" style={{ textDecoration: 'none', color: '#1976d2', fontSize: '0.875rem' }}>
+          ¿Olvidaste tu contraseña?
+        </a>
+      </Box>
+
       <Button
         label={isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
         type="submit"

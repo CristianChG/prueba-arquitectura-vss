@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR NOT NULL,
     email VARCHAR UNIQUE NOT NULL,
     password VARCHAR NOT NULL,
-    role INTEGER NOT NULL DEFAULT 3
+    role INTEGER NOT NULL DEFAULT 3,
+    reset_code VARCHAR,
+    reset_code_expires TIMESTAMP
 );
 
 -- Global Hato snapshots table

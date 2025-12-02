@@ -76,10 +76,10 @@ export function useAuthActions() {
     setIsLoading(true);
     try {
       await logoutUseCase.execute();
-      setUser(null);
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      setUser(null);
       setIsLoading(false);
     }
   }, []);
