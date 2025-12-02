@@ -6,6 +6,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem as SelectMenuItem,
+  type SelectChangeEvent,
 } from '@mui/material';
 
 interface CowsTableFiltersProps {
@@ -50,12 +51,12 @@ export const CowsTableFilters: React.FC<CowsTableFiltersProps> = React.memo(
           <Select
             value={recomendacionFilter}
             label="Filtrar por recomendación"
-            onChange={(e) => onRecomendacionFilterChange(e.target.value)}
+            onChange={(e: SelectChangeEvent) => onRecomendacionFilterChange(e.target.value as string)}
           >
             <SelectMenuItem value="">Todas</SelectMenuItem>
-            <SelectMenuItem value="0">Producción</SelectMenuItem>
-            <SelectMenuItem value="1">Monitorear</SelectMenuItem>
-            <SelectMenuItem value="2">Secar</SelectMenuItem>
+            <SelectMenuItem value="1">En Producción</SelectMenuItem>
+            <SelectMenuItem value="0">En Monitoreo</SelectMenuItem>
+            <SelectMenuItem value="2">Previo a Secado</SelectMenuItem>
           </Select>
         </FormControl>
       </Box>

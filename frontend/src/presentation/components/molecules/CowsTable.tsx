@@ -197,9 +197,9 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
             <MenuItem value="">
               <em>Todas</em>
             </MenuItem>
-            <MenuItem value="0">Producción</MenuItem>
-            <MenuItem value="1">Monitorear</MenuItem>
-            <MenuItem value="2">Secar</MenuItem>
+            <MenuItem value="1">En Producción</MenuItem>
+            <MenuItem value="0">En Monitoreo</MenuItem>
+            <MenuItem value="2">Previo a Secado</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -347,18 +347,18 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
                       let textColor = 'inherit';
 
                       switch (cow.recomendacion) {
-                        case 0:
-                          text = 'Producción';
+                        case 1:
+                          text = 'En Producción';
                           color = '#e8f5e9'; // Light green
                           textColor = '#2e7d32'; // Dark green
                           break;
-                        case 1:
-                          text = 'Monitorear';
+                        case 0:
+                          text = 'En Monitoreo';
                           color = '#fff3e0'; // Light orange
                           textColor = '#ef6c00'; // Dark orange
                           break;
                         case 2:
-                          text = 'Secar';
+                          text = 'Previo a Secado';
                           color = '#ffebee'; // Light red
                           textColor = '#c62828'; // Dark red
                           break;

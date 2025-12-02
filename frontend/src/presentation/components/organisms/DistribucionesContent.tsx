@@ -65,9 +65,9 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
         // Handle recommendation mapping
         if (selectedVariable === 'recomendacion' && typeof val === 'number') {
           switch (val) {
-            case 0: return 'Producción';
-            case 1: return 'Monitorear';
-            case 2: return 'Secar';
+            case 1: return 'En Producción';
+            case 0: return 'En Monitoreo';
+            case 2: return 'Previo a Secado';
             default: return 'Desconocido';
           }
         }
@@ -92,9 +92,9 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
         // Handle recommendation mapping
         if (selectedVariable === 'recomendacion' && typeof val === 'number') {
           switch (val) {
-            case 0: return 'Producción';
-            case 1: return 'Monitorear';
-            case 2: return 'Secar';
+            case 1: return 'En Producción';
+            case 0: return 'En Monitoreo';
+            case 2: return 'Previo a Secado';
             default: return 'Desconocido';
           }
         }

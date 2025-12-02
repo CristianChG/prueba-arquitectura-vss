@@ -64,7 +64,7 @@ class PredictionService:
             cow_data: Dictionary containing cow metrics.
             
         Returns:
-            Predicted category (0: Producción, 1: Monitorear, 2: Secar) or None if prediction fails.
+            Predicted category (1: En Producción, 0: En Monitoreo, 2: Previo a Secado) or None if prediction fails.
         """
         if not self.model:
             return None
