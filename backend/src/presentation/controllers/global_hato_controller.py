@@ -419,6 +419,7 @@ class GlobalHatoController:
             sort_order = request.args.get('sort_order', None, type=str)
             search = request.args.get('search', None, type=str)
             nombre_grupo = request.args.get('nombre_grupo', None, type=str)
+            recomendacion = request.args.get('recomendacion', None, type=int)
 
             # Execute use case
             result = await self.get_all_cows_by_snapshot.execute(
@@ -429,7 +430,8 @@ class GlobalHatoController:
                 sort_by,
                 sort_order,
                 search,
-                nombre_grupo
+                nombre_grupo,
+                recomendacion
             )
 
             # Serialize response

@@ -19,12 +19,14 @@ interface CowsTableProps {
   snapshotId: number | '';
   search: string;
   grupoFilter: string;
+  recomendacionFilter: string;
 }
 
 export const CowsTable: React.FC<CowsTableProps> = ({
   snapshotId,
   search,
   grupoFilter,
+  recomendacionFilter,
 }) => {
   const [cows, setCows] = useState<Cow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
         sortOrder: order,
         search: search || undefined,
         nombreGrupo: grupoFilter || undefined,
+        recomendacion: recomendacionFilter !== '' ? Number(recomendacionFilter) : undefined,
       });
       setCows(data.cows);
       setPagination(data.pagination);
@@ -62,7 +65,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [snapshotId, pagination.page, pagination.limit, orderBy, order, search, grupoFilter]);
+  }, [snapshotId, pagination.page, pagination.limit, orderBy, order, search, grupoFilter, recomendacionFilter]);
 
   useEffect(() => {
     loadCows();
@@ -71,7 +74,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({
   // Reset pagination to page 1 when filters change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [search, grupoFilter, snapshotId]);
+  }, [search, grupoFilter, recomendacionFilter, snapshotId]);
 
   const handleChangePage = useCallback((_event: unknown, newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage + 1 }));

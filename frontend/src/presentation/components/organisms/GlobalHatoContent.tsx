@@ -13,6 +13,7 @@ export const GlobalHatoContent: React.FC<GlobalHatoContentProps> = ({ selectedSn
   // State
   const [search, setSearch] = useState('');
   const [grupoFilter, setGrupoFilter] = useState('');
+  const [recomendacionFilter, setRecomendacionFilter] = useState('');
   const [allCows, setAllCows] = useState<Cow[]>([]);
 
   // Load all cows for the selected snapshot (to get unique groups)
@@ -54,9 +55,11 @@ export const GlobalHatoContent: React.FC<GlobalHatoContentProps> = ({ selectedSn
       <CowsTableFilters
         search={search}
         grupoFilter={grupoFilter}
+        recomendacionFilter={recomendacionFilter}
         availableGroups={availableGroups}
         onSearchChange={setSearch}
         onGrupoFilterChange={setGrupoFilter}
+        onRecomendacionFilterChange={setRecomendacionFilter}
       />
 
       {/* Cows Table */}
@@ -64,6 +67,7 @@ export const GlobalHatoContent: React.FC<GlobalHatoContentProps> = ({ selectedSn
         snapshotId={selectedSnapshotId}
         search={search}
         grupoFilter={grupoFilter}
+        recomendacionFilter={recomendacionFilter}
       />
     </Box>
   );

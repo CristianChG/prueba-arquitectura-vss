@@ -74,6 +74,7 @@ export interface GetCowsParams {
   sortOrder?: 'asc' | 'desc';
   search?: string;
   nombreGrupo?: string;
+  recomendacion?: number;
 }
 
 export interface GetCowsResponse {
@@ -162,6 +163,7 @@ export class GlobalHatosAPI {
     if (params?.sortOrder) queryParams.append('sort_order', params.sortOrder);
     if (params?.search) queryParams.append('search', params.search);
     if (params?.nombreGrupo) queryParams.append('nombre_grupo', params.nombreGrupo);
+    if (params?.recomendacion !== undefined) queryParams.append('recomendacion', params.recomendacion.toString());
 
     const url = queryParams.toString()
       ? `${this.BASE_PATH}/${snapshotId}/vacas?${queryParams.toString()}`

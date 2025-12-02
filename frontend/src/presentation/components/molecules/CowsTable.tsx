@@ -18,6 +18,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import type { Cow } from '../../../infrastructure/api/GlobalHatosAPI';
 
 interface CowsTableProps {
@@ -25,13 +26,14 @@ interface CowsTableProps {
   loading: boolean;
 }
 
-type OrderBy = 'numero_animal' | 'produccion_leche_ayer' | 'produccion_media_7dias' | 'estado_reproduccion' | 'dias_ordeno';
+type OrderBy = 'numero_animal' | 'produccion_leche_ayer' | 'produccion_media_7dias' | 'estado_reproduccion' | 'dias_ordeno' | 'recomendacion';
 
 export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
   const [orderBy, setOrderBy] = useState<OrderBy>('numero_animal');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [search, setSearch] = useState('');
   const [estadoReproductivoFilter, setEstadoReproductivoFilter] = useState<string>('');
+  const [recomendacionFilter, setRecomendacionFilter] = useState<string>('');
   const [page, setPage] = useState(0); // MUI uses 0-based indexing
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -40,6 +42,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
     setPage(0);
     setSearch('');
     setEstadoReproductivoFilter('');
+    setRecomendacionFilter('');
   }, [cows]);
 
   const handleRequestSort = useCallback((property: OrderBy) => {
@@ -56,6 +59,11 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
 
   const handleEstadoReproductivoChange = useCallback((event: any) => {
     setEstadoReproductivoFilter(event.target.value);
+    setPage(0); // Reset to first page when filtering
+  }, []);
+
+  const handleRecomendacionChange = useCallback((event: any) => {
+    setRecomendacionFilter(event.target.value);
     setPage(0); // Reset to first page when filtering
   }, []);
 
@@ -99,6 +107,13 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
       );
     }
 
+    // Filter by recommendation
+    if (recomendacionFilter !== '') {
+      filtered = filtered.filter(cow =>
+        cow.recomendacion === Number(recomendacionFilter)
+      );
+    }
+
     // Step 2: Sort (existing logic)
     const sorted = [...filtered].sort((a, b) => {
       let aValue = a[orderBy];
@@ -132,7 +147,7 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
       data: sorted.slice(startIndex, endIndex),
       total: filtered.length,
     };
-  }, [cows, search, estadoReproductivoFilter, orderBy, order, page, rowsPerPage]);
+  }, [cows, search, estadoReproductivoFilter, recomendacionFilter, orderBy, order, page, rowsPerPage]);
 
   if (loading) {
     return (
@@ -171,6 +186,22 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
             ))}
           </Select>
         </FormControl>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="recomendacion-label">Recomendación</InputLabel>
+          <Select
+            labelId="recomendacion-label"
+            value={recomendacionFilter}
+            onChange={handleRecomendacionChange}
+            label="Recomendación"
+          >
+            <MenuItem value="">
+              <em>Todas</em>
+            </MenuItem>
+            <MenuItem value="0">Producción</MenuItem>
+            <MenuItem value="1">Monitorear</MenuItem>
+            <MenuItem value="2">Secar</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       <TableContainer
@@ -180,104 +211,200 @@ export const CowsTable: React.FC<CowsTableProps> = ({ cows, loading }) => {
           backgroundColor: 'transparent',
         }}
       >
-      <Table sx={{ tableLayout: 'fixed' }}>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: 'transparent' }}>
-            <TableCell sx={{ fontWeight: 600, width: '15%' }}>
-              <TableSortLabel
-                active={orderBy === 'numero_animal'}
-                direction={orderBy === 'numero_animal' ? order : 'asc'}
-                onClick={() => handleRequestSort('numero_animal')}
-              >
-                Número
-              </TableSortLabel>
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '15%' }}>
-              Núm. Selección
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '18%' }}>
-              <TableSortLabel
-                active={orderBy === 'produccion_leche_ayer'}
-                direction={orderBy === 'produccion_leche_ayer' ? order : 'asc'}
-                onClick={() => handleRequestSort('produccion_leche_ayer')}
-              >
-                Producción ayer (L)
-              </TableSortLabel>
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '18%' }}>
-              <TableSortLabel
-                active={orderBy === 'produccion_media_7dias'}
-                direction={orderBy === 'produccion_media_7dias' ? order : 'asc'}
-                onClick={() => handleRequestSort('produccion_media_7dias')}
-              >
-                Promedio 7 días (L)
-              </TableSortLabel>
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '20%' }}>
-              <TableSortLabel
-                active={orderBy === 'estado_reproduccion'}
-                direction={orderBy === 'estado_reproduccion' ? order : 'asc'}
-                onClick={() => handleRequestSort('estado_reproduccion')}
-              >
-                Estado reproducción
-              </TableSortLabel>
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600, width: '14%' }}>
-              <TableSortLabel
-                active={orderBy === 'dias_ordeno'}
-                direction={orderBy === 'dias_ordeno' ? order : 'asc'}
-                onClick={() => handleRequestSort('dias_ordeno')}
-              >
-                Días ordeño
-              </TableSortLabel>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {processedCows.data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} align="center">
-                <Typography color="text.secondary" sx={{ py: 2 }}>
-                  {search || estadoReproductivoFilter
-                    ? 'No se encontraron vacas con los filtros aplicados'
-                    : 'No hay vacas en este grupo'}
-                </Typography>
+        <Table sx={{ tableLayout: 'fixed' }}>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'transparent' }}>
+              <TableCell sx={{ fontWeight: 600, width: '15%' }}>
+                <TableSortLabel
+                  active={orderBy === 'numero_animal'}
+                  direction={orderBy === 'numero_animal' ? order : 'asc'}
+                  onClick={() => handleRequestSort('numero_animal')}
+                >
+                  Número
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '15%' }}>
+                Núm. Selección
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '18%' }}>
+                <TableSortLabel
+                  active={orderBy === 'produccion_leche_ayer'}
+                  direction={orderBy === 'produccion_leche_ayer' ? order : 'asc'}
+                  onClick={() => handleRequestSort('produccion_leche_ayer')}
+                >
+                  Producción ayer (L)
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '18%' }}>
+                <TableSortLabel
+                  active={orderBy === 'produccion_media_7dias'}
+                  direction={orderBy === 'produccion_media_7dias' ? order : 'asc'}
+                  onClick={() => handleRequestSort('produccion_media_7dias')}
+                >
+                  Promedio 7 días (L)
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '20%' }}>
+                <TableSortLabel
+                  active={orderBy === 'estado_reproduccion'}
+                  direction={orderBy === 'estado_reproduccion' ? order : 'asc'}
+                  onClick={() => handleRequestSort('estado_reproduccion')}
+                >
+                  Estado reproducción
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '14%' }}>
+                <TableSortLabel
+                  active={orderBy === 'dias_ordeno'}
+                  direction={orderBy === 'dias_ordeno' ? order : 'asc'}
+                  onClick={() => handleRequestSort('dias_ordeno')}
+                >
+                  Días ordeño
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '18%' }}>
+                <TableSortLabel
+                  active={orderBy === 'recomendacion'}
+                  direction={orderBy === 'recomendacion' ? order : 'asc'}
+                  onClick={() => handleRequestSort('recomendacion')}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      position: 'relative',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {/* Base Content */}
+                    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <AutoAwesomeIcon sx={{ fontSize: 16, mr: 0.5, color: 'inherit' }} /> Recomendación
+                    </Box>
+
+                    {/* Shimmer Overlay - Clipped to text */}
+                    <Box
+                      component="span"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%)',
+                        backgroundSize: '200% 100%',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        color: 'transparent',
+                        animation: 'shine 3s infinite linear',
+                        pointerEvents: 'none',
+                        '@keyframes shine': {
+                          '0%': { backgroundPosition: '-100% 0' },
+                          '100%': { backgroundPosition: '200% 0' }
+                        },
+                        // Ensure icon inherits transparent color to show background
+                        '& .MuiSvgIcon-root': {
+                          color: 'inherit',
+                        }
+                      }}
+                    >
+                      <AutoAwesomeIcon sx={{ fontSize: 16, mr: 0.5 }} /> Recomendación
+                    </Box>
+                  </Box>
+                </TableSortLabel>
               </TableCell>
             </TableRow>
-          ) : (
-            processedCows.data.map((cow) => (
-              <TableRow key={cow.id} hover>
-                <TableCell>{cow.numero_animal}</TableCell>
-                <TableCell>{cow.numero_seleccion ?? '-'}</TableCell>
-                <TableCell>
-                  {cow.produccion_leche_ayer != null ? Number(cow.produccion_leche_ayer).toFixed(2) : '-'}
+          </TableHead>
+          <TableBody>
+            {processedCows.data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Typography color="text.secondary" sx={{ py: 2 }}>
+                    {search || estadoReproductivoFilter
+                      ? 'No se encontraron vacas con los filtros aplicados'
+                      : 'No hay vacas en este grupo'}
+                  </Typography>
                 </TableCell>
-                <TableCell>
-                  {cow.produccion_media_7dias != null ? Number(cow.produccion_media_7dias).toFixed(2) : '-'}
-                </TableCell>
-                <TableCell>{cow.estado_reproduccion || '-'}</TableCell>
-                <TableCell>{cow.dias_ordeno || '-'}</TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              processedCows.data.map((cow) => (
+                <TableRow key={cow.id} hover>
+                  <TableCell>{cow.numero_animal}</TableCell>
+                  <TableCell>{cow.numero_seleccion ?? '-'}</TableCell>
+                  <TableCell>
+                    {cow.produccion_leche_ayer != null ? Number(cow.produccion_leche_ayer).toFixed(2) : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {cow.produccion_media_7dias != null ? Number(cow.produccion_media_7dias).toFixed(2) : '-'}
+                  </TableCell>
+                  <TableCell>{cow.estado_reproduccion || '-'}</TableCell>
+                  <TableCell>{cow.dias_ordeno || '-'}</TableCell>
+                  <TableCell>
+                    {(() => {
+                      let text = '-';
+                      let color = 'transparent';
+                      let textColor = 'inherit';
 
-      {/* Pagination */}
-      <TablePagination
-        component="div"
-        count={processedCows.total}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[10, 25, 50]}
-        labelRowsPerPage="Filas por página:"
-        labelDisplayedRows={({ from, to, count }) =>
-          `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
-        }
-      />
-    </TableContainer>
+                      switch (cow.recomendacion) {
+                        case 0:
+                          text = 'Producción';
+                          color = '#e8f5e9'; // Light green
+                          textColor = '#2e7d32'; // Dark green
+                          break;
+                        case 1:
+                          text = 'Monitorear';
+                          color = '#fff3e0'; // Light orange
+                          textColor = '#ef6c00'; // Dark orange
+                          break;
+                        case 2:
+                          text = 'Secar';
+                          color = '#ffebee'; // Light red
+                          textColor = '#c62828'; // Dark red
+                          break;
+                      }
+
+                      if (text === '-') return text;
+
+                      return (
+                        <Box
+                          sx={{
+                            backgroundColor: color,
+                            color: textColor,
+                            py: 0.5,
+                            px: 1.5,
+                            borderRadius: '16px',
+                            display: 'inline-block',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          {text}
+                        </Box>
+                      );
+                    })()}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+
+        {/* Pagination */}
+        <TablePagination
+          component="div"
+          count={processedCows.total}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50]}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+          }
+        />
+      </TableContainer>
     </>
   );
 };

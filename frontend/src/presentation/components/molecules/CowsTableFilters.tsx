@@ -11,13 +11,15 @@ import {
 interface CowsTableFiltersProps {
   search: string;
   grupoFilter: string;
+  recomendacionFilter: string;
   availableGroups: string[];
   onSearchChange: (value: string) => void;
   onGrupoFilterChange: (value: string) => void;
+  onRecomendacionFilterChange: (value: string) => void;
 }
 
 export const CowsTableFilters: React.FC<CowsTableFiltersProps> = React.memo(
-  ({ search, grupoFilter, availableGroups, onSearchChange, onGrupoFilterChange }) => {
+  ({ search, grupoFilter, recomendacionFilter, availableGroups, onSearchChange, onGrupoFilterChange, onRecomendacionFilterChange }) => {
     return (
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
         <TextField
@@ -41,6 +43,19 @@ export const CowsTableFilters: React.FC<CowsTableFiltersProps> = React.memo(
                 {group}
               </SelectMenuItem>
             ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 250 }}>
+          <InputLabel>Filtrar por recomendación</InputLabel>
+          <Select
+            value={recomendacionFilter}
+            label="Filtrar por recomendación"
+            onChange={(e) => onRecomendacionFilterChange(e.target.value)}
+          >
+            <SelectMenuItem value="">Todas</SelectMenuItem>
+            <SelectMenuItem value="0">Producción</SelectMenuItem>
+            <SelectMenuItem value="1">Monitorear</SelectMenuItem>
+            <SelectMenuItem value="2">Secar</SelectMenuItem>
           </Select>
         </FormControl>
       </Box>

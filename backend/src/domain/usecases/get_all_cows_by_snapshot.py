@@ -18,7 +18,8 @@ class GetAllCowsBySnapshot:
         sort_by: Optional[str] = None,
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
-        nombre_grupo: Optional[str] = None
+        nombre_grupo: Optional[str] = None,
+        recomendacion: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Execute the use case to get all cows for a snapshot.
@@ -32,6 +33,7 @@ class GetAllCowsBySnapshot:
             sort_order: Sort direction ('asc' or 'desc')
             search: Search query for partial matching
             nombre_grupo: Filter by group name
+            recomendacion: Filter by recommendation category
 
         Returns:
             Dict with 'cows' (list) and 'pagination' (metadata)
@@ -44,5 +46,6 @@ class GetAllCowsBySnapshot:
             sort_by,
             sort_order,
             search,
-            nombre_grupo
+            nombre_grupo,
+            recomendacion
         )

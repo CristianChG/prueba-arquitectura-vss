@@ -243,7 +243,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
         sort_by: Optional[str] = None,
         sort_order: Optional[str] = None,
         search: Optional[str] = None,
-        nombre_grupo: Optional[str] = None
+        nombre_grupo: Optional[str] = None,
+        recomendacion: Optional[int] = None
     ) -> Dict[str, Any]:
         """Get all cows for a snapshot with pagination, sorting, and filtering."""
         session = self.db.get_session()
@@ -280,6 +281,10 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
             # Apply group filter (exact match)
             if nombre_grupo:
                 query = query.filter(CowModel.nombre_grupo == nombre_grupo)
+
+            # Apply recommendation filter (exact match)
+            if recomendacion is not None:
+                query = query.filter(CowModel.recomendacion == recomendacion)
 
             # Apply sorting
             if sort_by and sort_order:
