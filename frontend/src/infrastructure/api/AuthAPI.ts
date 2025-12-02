@@ -57,4 +57,31 @@ export class AuthAPI {
   async logout(): Promise<void> {
     await axiosInstance.post(API_ROUTES.LOGOUT);
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      await axiosInstance.post(API_ROUTES.FORGOT_PASSWORD, { email });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Error al solicitar recuperación';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    try {
+      await axiosInstance.post(API_ROUTES.RESET_PASSWORD, { email, code, newPassword });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Error al restablecer contraseña';
+      throw new Error(errorMessage);
+    }
+  }
+
+  async verifyCode(email: string, code: string): Promise<void> {
+    try {
+      await axiosInstance.post(API_ROUTES.VERIFY_CODE, { email, code });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Código inválido o expirado';
+      throw new Error(errorMessage);
+    }
+  }
 }

@@ -8,6 +8,8 @@ import { UsersPage } from "@pages/UsersPage";
 import { ArchivosPage } from "@pages/ArchivosPage";
 import { NotFoundPage } from "@pages/NotFoundPage";
 import { PendingApprovalPage } from "@pages/PendingApprovalPage";
+import { ForgotPasswordPage } from "@pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "@pages/ResetPasswordPage";
 import { APP_ROUTES } from "@constants/AppRoutes";
 import { ROLES } from "@constants/roles";
 
@@ -22,6 +24,14 @@ export const AppRoutes: React.FC = () => {
         <Route
           path={APP_ROUTES.REGISTER}
           element={<AuthRoute element={<RegisterPage />} />}
+        />
+        <Route
+          path="/forgot-password"
+          element={<AuthRoute element={<ForgotPasswordPage />} />}
+        />
+        <Route
+          path="/reset-password"
+          element={<AuthRoute element={<ResetPasswordPage />} />}
         />
         <Route
           path={APP_ROUTES.PENDING_APPROVAL}

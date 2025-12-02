@@ -31,8 +31,12 @@ from domain.usecases import (
     UpdateUserRole,
     CreateGlobalHato,
     GetAllGlobalHatos,
-    DeleteGlobalHato
+    DeleteGlobalHato,
+    RequestPasswordReset,
+    ResetPassword,
+    VerifyResetCode
 )
+from infrastructure.adapters.email_service import EmailService
 
 # Presentation
 from presentation.controllers import AuthController, CowController, DatasetController, UserController, GlobalHatoController
@@ -81,6 +85,11 @@ def create_app() -> Flask:
     create_global_hato = CreateGlobalHato(global_hato_repository)
     get_all_global_hatos = GetAllGlobalHatos(global_hato_repository)
     delete_global_hato = DeleteGlobalHato(global_hato_repository)
+    
+    email_service = EmailService()
+    request_password_reset = RequestPasswordReset(auth_repository, email_service)
+    reset_password_usecase = ResetPassword(auth_repository)
+    verify_reset_code_usecase = VerifyResetCode(auth_repository)
 
     # Dependency Injection: Create controller instances
     auth_controller = AuthController(
@@ -88,7 +97,10 @@ def create_app() -> Flask:
         register_user=register_user,
         logout_user=logout_user,
         get_current_user=get_current_user,
-        refresh_token_usecase=refresh_token_usecase
+        refresh_token_usecase=refresh_token_usecase,
+        request_password_reset=request_password_reset,
+        reset_password_usecase=reset_password_usecase,
+        verify_reset_code_usecase=verify_reset_code_usecase
     )
     cow_controller = CowController(cow_repository=cow_repository)
     dataset_controller = DatasetController(

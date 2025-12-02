@@ -10,9 +10,10 @@ export const PendingApprovalPage: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate(APP_ROUTES.LOGIN);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+    } finally {
+      navigate(APP_ROUTES.LOGIN);
     }
   };
 

@@ -36,4 +36,19 @@ def create_auth_routes(auth_controller: AuthController) -> Blueprint:
         """Refresh token endpoint."""
         return asyncio.run(auth_controller.refresh())
 
+    @auth_bp.route('/forgot-password', methods=['POST'])
+    def forgot_password():
+        """Forgot password endpoint."""
+        return asyncio.run(auth_controller.forgot_password())
+
+    @auth_bp.route('/reset-password', methods=['POST'])
+    def reset_password():
+        """Reset password endpoint."""
+        return asyncio.run(auth_controller.reset_password())
+
+    @auth_bp.route('/verify-code', methods=['POST'])
+    def verify_code():
+        """Verify reset code endpoint."""
+        return asyncio.run(auth_controller.verify_code())
+
     return auth_bp

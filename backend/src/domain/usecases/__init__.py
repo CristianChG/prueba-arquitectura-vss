@@ -9,6 +9,8 @@ from .update_user_role import UpdateUserRole
 from .create_global_hato import CreateGlobalHato
 from .get_all_global_hatos import GetAllGlobalHatos
 from .delete_global_hato import DeleteGlobalHato
+from .password_recovery import RequestPasswordReset, ResetPassword
+from .verify_reset_code import VerifyResetCode
 
 __all__ = [
     "LoginUser",
@@ -22,4 +24,7 @@ __all__ = [
     "CreateGlobalHato",
     "GetAllGlobalHatos",
     "DeleteGlobalHato",
+    "RequestPasswordReset",
+    "ResetPassword",
+    "VerifyResetCode",
 ]

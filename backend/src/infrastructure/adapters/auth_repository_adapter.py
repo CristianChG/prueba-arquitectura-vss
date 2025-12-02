@@ -143,6 +143,57 @@ class AuthRepositoryAdapter(IAuthRepository):
         finally:
             session.close()
 
+    async def save_reset_code(self, email: str, code: str) -> None:
+        """Save reset code for user."""
+        session = self.db.get_session()
+        try:
+            user = session.query(UserModel).filter(UserModel.email == email).first()
+            if not user:
+                # Don't reveal user existence, just return
+                return
+            
+            user.reset_code = code
+            user.reset_code_expires = datetime.utcnow() + timedelta(minutes=15)
+            session.commit()
+        finally:
+            session.close()
+
+    async def verify_reset_code(self, email: str, code: str) -> bool:
+        """Verify if reset code is valid."""
+        session = self.db.get_session()
+        try:
+            user = session.query(UserModel).filter(UserModel.email == email).first()
+            if not user or not user.reset_code or not user.reset_code_expires:
+                return False
+            
+            if user.reset_code != code:
+                return False
+            
+            if user.reset_code_expires < datetime.utcnow():
+                return False
+                
+            return True
+        finally:
+            session.close()
+
+    async def reset_password(self, email: str, new_password: str) -> None:
+        """Reset user password and clear reset code."""
+        session = self.db.get_session()
+        try:
+            user = session.query(UserModel).filter(UserModel.email == email).first()
+            if not user:
+                raise ValueError(AuthMessages.USER_NOT_FOUND)
+            
+            # Hash new password
+            password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            user.password = password_hash
+            user.reset_code = None
+            user.reset_code_expires = None
+            session.commit()
+        finally:
+            session.close()
+
     def _create_access_token(self, user_id: int, role: int) -> str:
         """Create JWT access token."""
         expire = datetime.utcnow() + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
