@@ -1,13 +1,15 @@
 """Global Hato controller with dependency injection."""
 from flask import jsonify, request, send_file
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 from domain.usecases import CreateGlobalHato, GetAllGlobalHatos, DeleteGlobalHato
 from infrastructure.storage import local_storage_service
 from werkzeug.utils import secure_filename
 import os
 import uuid
 import csv
+import pandas as pd
+from utils.hato_data_cleaner import HatoDataCleaner
 
 
 class GlobalHatoController:
@@ -183,86 +185,59 @@ class GlobalHatoController:
                 valid_cows = []
                 invalid_rows = []
 
-                with open(temp_path, 'r', encoding='utf-8-sig') as csvfile:  # utf-8-sig handles BOM
-                    # Detect delimiter (CSV vs TSV)
-                    sample = csvfile.read(1024)
-                    csvfile.seek(0)
-                    sniffer = csv.Sniffer()
-                    try:
-                        delimiter = sniffer.sniff(sample).delimiter
-                    except:
-                        delimiter = ','  # Default to comma if detection fails
+                # Parse CSV using pandas and run cleaner pipeline
+                try:
+                    # Read CSV with pandas (handles BOM automatically)
+                    # Use on_bad_lines='skip' or similar if needed, but default is usually fine
+                    df = pd.read_csv(temp_path)
+                    
+                    # Run cleaning pipeline
+                    cleaner = HatoDataCleaner(df)
+                    cleaned_df = cleaner.run_pipeline()
+                    
+                    if cleaned_df.empty:
+                         os.remove(temp_path)
+                         return jsonify({
+                             "error": "No valid rows found after cleaning"
+                         }), 400
 
-                    # Read CSV/TSV
-                    reader = csv.DictReader(csvfile, delimiter=delimiter)
-
-                    # Expected columns (Spanish headers from UploadGlobalHatoModal.tsx)
-                    expected_columns = {
-                        'Número del animal',
-                        'Nombre del grupo',
-                        'Producción de leche ayer',
-                        'Producción media diaria últimos 7 días',
-                        'Estado de la reproducción',
-                        'Días en ordeño',
-                        'Número(s) de selección de animal'
-                    }
-
-                    # Check headers
-                    if not expected_columns.issubset(set(reader.fieldnames or [])):
-                        os.remove(temp_path)
-                        missing = expected_columns - set(reader.fieldnames or [])
-                        return jsonify({
-                            "error": f"Missing required columns: {', '.join(missing)}"
-                        }), 400
-
-                    # Helper functions to safely parse numeric values
-                    def safe_float(value: str) -> Optional[float]:
-                        """Convert string to float, return None if empty."""
-                        if not value or not value.strip():
-                            return None
-                        try:
-                            return float(value)
-                        except ValueError:
-                            raise  # Re-raise to be caught by main exception handler
-
-                    def safe_int(value: str) -> Optional[int]:
-                        """Convert string to int, return None if empty."""
-                        if not value or not value.strip():
-                            return None
-                        try:
-                            return int(value)
-                        except ValueError:
-                            raise  # Re-raise to be caught by main exception handler
-
-                    # Parse each row
-                    for row_num, row in enumerate(reader, start=2):  # Start at 2 (1=header)
+                    # Convert cleaned DataFrame to list of dicts for validation/processing
+                    # Map DataFrame columns to application fields
+                    for index, row in cleaned_df.iterrows():
                         try:
                             # Helper to safely parse string field
-                            def safe_str(value: str) -> Optional[str]:
+                            def safe_str(value: Any) -> Optional[str]:
                                 """Convert to string and return None if empty."""
-                                if not value or str(value).strip() == '':
+                                if pd.isna(value) or str(value).strip() == '':
                                     return None
                                 return str(value).strip()
 
-                            # Debug: print first few rows
-                            if row_num <= 5:
-                                print(f"DEBUG Row {row_num}: numero_seleccion raw = '{row.get('Número(s) de selección de animal', 'KEY_NOT_FOUND')}'")
+                            # Helper to safely parse numeric values (already handled by fillna(0) but good to be safe)
+                            def safe_float(value: Any) -> Optional[float]:
+                                if pd.isna(value):
+                                    return 0.0
+                                try:
+                                    return float(value)
+                                except (ValueError, TypeError):
+                                    return 0.0
 
-                            # Validate and parse row
+                            def safe_int(value: Any) -> Optional[int]:
+                                if pd.isna(value):
+                                    return 0
+                                try:
+                                    return int(value)
+                                except (ValueError, TypeError):
+                                    return 0
+
                             cow_data = {
                                 'numero_animal': str(row['Número del animal']).strip(),
                                 'nombre_grupo': str(row['Nombre del grupo']).strip(),
-                                'produccion_leche_ayer': safe_float(row['Producción de leche ayer']),
-                                'produccion_media_7dias': safe_float(row['Producción media diaria últimos 7 días']),
-                                'estado_reproduccion': str(row['Estado de la reproducción']).strip(),
-                                'dias_ordeno': safe_int(row['Días en ordeño']),
-                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal', ''))
+                                'produccion_leche_ayer': safe_float(row.get('Producción de leche ayer')),
+                                'produccion_media_7dias': safe_float(row.get('Producción media diaria últimos 7 días')),
+                                'estado_reproduccion': safe_str(row.get('Estado de la reproducción')),
+                                'dias_ordeno': safe_int(row.get('Días en ordeño')),
+                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal'))
                             }
-
-                            # Debug: print parsed value
-                            if row_num <= 5:
-                                print(f"DEBUG Row {row_num}: numero_seleccion parsed = '{cow_data['numero_seleccion']}'")
-
 
                             # Validate required fields
                             if not cow_data['numero_animal']:
@@ -274,10 +249,14 @@ class GlobalHatoController:
 
                         except (ValueError, KeyError) as e:
                             invalid_rows.append({
-                                'row': row_num,
+                                'row': index + 2, # +2 for 1-based index and header
                                 'error': str(e),
-                                'data': dict(row)
+                                'data': row.to_dict()
                             })
+
+                except Exception as e:
+                     # If pandas fails completely (e.g. invalid CSV format)
+                     raise ValueError(f"Error processing CSV: {str(e)}")
 
                 # Check if we have at least some valid rows
                 if len(valid_cows) == 0:
