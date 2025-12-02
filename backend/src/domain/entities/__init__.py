@@ -5,6 +5,7 @@ from .dataset import Dataset
 from .model import Model
 from .prediction import Prediction
 from .global_hato import GlobalHato
+from .corral_group import CorralGroup
 
 __all__ = [
     "User",
@@ -14,4 +15,5 @@ __all__ = [
     "Model",
     "Prediction",
     "GlobalHato",
+    "CorralGroup",
 ]

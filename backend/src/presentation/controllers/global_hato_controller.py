@@ -1,12 +1,15 @@
 """Global Hato controller with dependency injection."""
 from flask import jsonify, request, send_file
 from datetime import datetime
+from typing import Optional, Any
 from domain.usecases import CreateGlobalHato, GetAllGlobalHatos, DeleteGlobalHato
 from infrastructure.storage import local_storage_service
 from werkzeug.utils import secure_filename
 import os
 import uuid
 import csv
+import pandas as pd
+from utils.hato_data_cleaner import HatoDataCleaner
 
 
 class GlobalHatoController:
@@ -16,11 +19,17 @@ class GlobalHatoController:
         self,
         create_global_hato: CreateGlobalHato,
         get_all_global_hatos: GetAllGlobalHatos,
-        delete_global_hato: DeleteGlobalHato
+        delete_global_hato: DeleteGlobalHato,
+        get_corrales_by_snapshot: 'GetCorralesBySnapshot',
+        get_cows_by_group: 'GetCowsByGroup',
+        get_all_cows_by_snapshot: 'GetAllCowsBySnapshot'
     ):
         self.create_global_hato = create_global_hato
         self.get_all_global_hatos = get_all_global_hatos
         self.delete_global_hato = delete_global_hato
+        self.get_corrales_by_snapshot = get_corrales_by_snapshot
+        self.get_cows_by_group = get_cows_by_group
+        self.get_all_cows_by_snapshot = get_all_cows_by_snapshot
 
     def _serialize_global_hato(self, global_hato):
         """Serialize GlobalHato entity to JSON."""
@@ -176,53 +185,84 @@ class GlobalHatoController:
                 valid_cows = []
                 invalid_rows = []
 
-                with open(temp_path, 'r', encoding='utf-8-sig') as csvfile:  # utf-8-sig handles BOM
-                    # Read CSV
-                    reader = csv.DictReader(csvfile)
+                # Parse CSV using pandas and run cleaner pipeline
+                try:
+                    # Read CSV with pandas (handles BOM automatically)
+                    # Use on_bad_lines='skip' or similar if needed, but default is usually fine
+                    df = pd.read_csv(temp_path)
+                    
+                    # Run cleaning pipeline
+                    cleaner = HatoDataCleaner(df)
+                    cleaned_df = cleaner.run_pipeline()
+                    
+                    if cleaned_df.empty:
+                         os.remove(temp_path)
+                         return jsonify({
+                             "error": "No valid rows found after cleaning"
+                         }), 400
 
-                    # Expected columns (Spanish headers from UploadGlobalHatoModal.tsx)
-                    expected_columns = {
-                        'Número del animal',
-                        'Nombre del grupo',
-                        'Producción de leche ayer',
-                        'Producción media diaria últimos 7 días',
-                        'Estado de la reproducción',
-                        'Días en ordeño'
-                    }
-
-                    # Check headers
-                    if not expected_columns.issubset(set(reader.fieldnames or [])):
-                        os.remove(temp_path)
-                        missing = expected_columns - set(reader.fieldnames or [])
-                        return jsonify({
-                            "error": f"Missing required columns: {', '.join(missing)}"
-                        }), 400
-
-                    # Parse each row
-                    for row_num, row in enumerate(reader, start=2):  # Start at 2 (1=header)
+                    # Convert cleaned DataFrame to list of dicts for validation/processing
+                    # Map DataFrame columns to application fields
+                    for index, row in cleaned_df.iterrows():
                         try:
-                            # Validate and parse row
+                            # Helper to safely parse string field
+                            def safe_str(value: Any) -> Optional[str]:
+                                """Convert to string and return None if empty."""
+                                if pd.isna(value) or str(value).strip() == '':
+                                    return None
+                                return str(value).strip()
+
+                            # Helper to safely parse numeric values (already handled by fillna(0) but good to be safe)
+                            def safe_float(value: Any) -> Optional[float]:
+                                if pd.isna(value):
+                                    return 0.0
+                                try:
+                                    return float(value)
+                                except (ValueError, TypeError):
+                                    return 0.0
+
+                            def safe_int(value: Any) -> Optional[int]:
+                                if pd.isna(value):
+                                    return 0
+                                try:
+                                    return int(value)
+                                except (ValueError, TypeError):
+                                    return 0
+
                             cow_data = {
                                 'numero_animal': str(row['Número del animal']).strip(),
                                 'nombre_grupo': str(row['Nombre del grupo']).strip(),
-                                'produccion_leche_ayer': float(row['Producción de leche ayer']),
-                                'produccion_media_7dias': float(row['Producción media diaria últimos 7 días']),
-                                'estado_reproduccion': str(row['Estado de la reproducción']).strip(),
-                                'dias_ordeno': int(row['Días en ordeño'])
+                                'produccion_leche_ayer': safe_float(row.get('Producción de leche ayer')),
+                                'produccion_media_7dias': safe_float(row.get('Producción media diaria últimos 7 días')),
+                                'estado_reproduccion': safe_str(row.get('Estado de la reproducción')),
+                                'dias_ordeno': safe_int(row.get('Días en ordeño')),
+                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal')),
+                                # Fields for AI Model
+                                'numero_lactacion': safe_int(row.get('Nº Lactación')),
+                                'numero_inseminaciones': safe_int(row.get('Número de inseminaciones')),
+                                'dias_prenada': safe_int(row.get('Días preñada')),
+                                'dias_para_parto': safe_int(row.get('Días para el parto')),
+                                'produccion_total_lactacion': safe_float(row.get('Producción TOTAL en lactación'))
                             }
 
-                            # Basic validation
+                            # Validate required fields
                             if not cow_data['numero_animal']:
                                 raise ValueError("Número del animal is required")
+                            if not cow_data['nombre_grupo']:
+                                raise ValueError("Nombre del grupo is required")
 
                             valid_cows.append(cow_data)
 
                         except (ValueError, KeyError) as e:
                             invalid_rows.append({
-                                'row': row_num,
+                                'row': index + 2, # +2 for 1-based index and header
                                 'error': str(e),
-                                'data': dict(row)
+                                'data': row.to_dict()
                             })
+
+                except Exception as e:
+                     # If pandas fails completely (e.g. invalid CSV format)
+                     raise ValueError(f"Error processing CSV: {str(e)}")
 
                 # Check if we have at least some valid rows
                 if len(valid_cows) == 0:
@@ -315,4 +355,108 @@ class GlobalHatoController:
 
         except Exception as e:
             print(f"Error downloading CSV: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_corrales_endpoint(self, global_hato_id: int):
+        """Handle get corrales by snapshot request."""
+        try:
+            user_id = request.user_id
+
+            # Execute use case
+            corrales = await self.get_corrales_by_snapshot.execute(global_hato_id, user_id)
+
+            # Serialize response
+            return jsonify([
+                {
+                    "nombre_grupo": corral.nombre_grupo,
+                    "total_animales": corral.total_animales,
+                    "produccion_promedio": corral.produccion_promedio,
+                    "produccion_total": corral.produccion_total,
+                    "produccion_promedio_7dias": corral.produccion_promedio_7dias
+                }
+                for corral in corrales
+            ]), 200
+        except Exception as e:
+            print(f"Error getting corrales: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_cows_by_group_endpoint(self, global_hato_id: int, nombre_grupo: str):
+        """Handle get cows by group request."""
+        try:
+            user_id = request.user_id
+
+            # Execute use case
+            cows = await self.get_cows_by_group.execute(global_hato_id, user_id, nombre_grupo)
+
+            # Serialize response
+            return jsonify([
+                {
+                    "id": cow.id,
+                    "numero_animal": cow.numero_animal,
+                    "nombre_grupo": cow.nombre_grupo,
+                    "produccion_leche_ayer": cow.produccion_leche_ayer,
+                    "produccion_media_7dias": cow.produccion_media_7dias,
+                    "estado_reproduccion": cow.estado_reproduccion,
+                    "dias_ordeno": cow.dias_ordeno,
+                    "numero_seleccion": cow.numero_seleccion,
+                    "recomendacion": cow.recomendacion
+                }
+                for cow in cows
+            ]), 200
+        except Exception as e:
+            print(f"Error getting cows by group: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    async def get_all_cows_endpoint(self, global_hato_id: int):
+        """Handle get all cows for a snapshot request with pagination, sorting, and filters."""
+        try:
+            user_id = request.user_id
+
+            # Get query parameters
+            page = request.args.get('page', 1, type=int)
+            limit = request.args.get('limit', 10, type=int)
+            sort_by = request.args.get('sort_by', None, type=str)
+            sort_order = request.args.get('sort_order', None, type=str)
+            search = request.args.get('search', None, type=str)
+            nombre_grupo = request.args.get('nombre_grupo', None, type=str)
+            recomendacion = request.args.get('recomendacion', None, type=int)
+
+            # Execute use case
+            result = await self.get_all_cows_by_snapshot.execute(
+                global_hato_id,
+                user_id,
+                page,
+                limit,
+                sort_by,
+                sort_order,
+                search,
+                nombre_grupo,
+                recomendacion
+            )
+
+            # Serialize response
+            return jsonify({
+                "cows": [
+                    {
+                        "id": cow.id,
+                        "numero_animal": cow.numero_animal,
+                        "nombre_grupo": cow.nombre_grupo,
+                        "produccion_leche_ayer": cow.produccion_leche_ayer,
+                        "produccion_media_7dias": cow.produccion_media_7dias,
+                        "estado_reproduccion": cow.estado_reproduccion,
+                        "dias_ordeno": cow.dias_ordeno,
+                        "numero_seleccion": cow.numero_seleccion,
+                        "recomendacion": cow.recomendacion
+                    }
+                    for cow in result['cows']
+                ],
+                "pagination": {
+                    "total": result['total'],
+                    "page": result['page'],
+                    "limit": result['limit'],
+                    "pages": result['pages']
+                }
+            }), 200
+        except Exception as e:
+            print(f"Error getting all cows for snapshot: {str(e)}")
             return jsonify({"error": "Internal server error"}), 500

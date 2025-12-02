@@ -1,6 +1,7 @@
 """Global Hato repository adapter using SQLAlchemy."""
 from typing import Optional, List, Dict, Any
-from domain.entities import GlobalHato, Cow
+from sqlalchemy import func
+from domain.entities import GlobalHato, Cow, CorralGroup
 from domain.repositories import IGlobalHatoRepository
 from infrastructure.database import GlobalHatoModel, CowModel
 from infrastructure.database.db_config import db_config
@@ -43,7 +44,9 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_leche_ayer=cow.produccion_leche_ayer,
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
-                    dias_ordeno=cow.dias_ordeno
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
                 )
                 for cow in cows
             ]
@@ -150,6 +153,197 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
             if global_hato_model:
                 session.delete(global_hato_model)
                 session.commit()
+        finally:
+            session.close()
+
+    async def get_corrales_by_snapshot(self, global_hato_id: int, user_id: int) -> List[CorralGroup]:
+        """Get aggregated corral data for a snapshot with user ownership verification."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return []
+
+            # Aggregate query
+            results = session.query(
+                CowModel.nombre_grupo,
+                func.count(CowModel.id).label('total_animales'),
+                func.avg(CowModel.produccion_leche_ayer).label('produccion_promedio'),
+                func.sum(CowModel.produccion_leche_ayer).label('produccion_total'),
+                func.avg(CowModel.produccion_media_7dias).label('produccion_promedio_7dias')
+            ).filter(
+                CowModel.global_hato_id == global_hato_id,
+                CowModel.nombre_grupo.isnot(None),
+                CowModel.nombre_grupo != ''
+            ).group_by(
+                CowModel.nombre_grupo
+            ).all()
+
+            return [
+                CorralGroup(
+                    nombre_grupo=row.nombre_grupo,
+                    total_animales=row.total_animales,
+                    produccion_promedio=round(float(row.produccion_promedio or 0), 2),
+                    produccion_total=round(float(row.produccion_total or 0), 2),
+                    produccion_promedio_7dias=round(float(row.produccion_promedio_7dias or 0), 2)
+                )
+                for row in results
+            ]
+        finally:
+            session.close()
+
+    async def get_cows_by_group(self, global_hato_id: int, user_id: int, nombre_grupo: str) -> List[Cow]:
+        """Get cows for a specific group in a snapshot with user ownership verification."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return []
+
+            # Query cows by group
+            cow_models = session.query(CowModel).filter(
+                CowModel.global_hato_id == global_hato_id,
+                CowModel.nombre_grupo == nombre_grupo
+            ).all()
+
+            return [
+                Cow(
+                    id=cow.id,
+                    global_hato_id=cow.global_hato_id,
+                    numero_animal=cow.numero_animal,
+                    nombre_grupo=cow.nombre_grupo,
+                    produccion_leche_ayer=cow.produccion_leche_ayer,
+                    produccion_media_7dias=cow.produccion_media_7dias,
+                    estado_reproduccion=cow.estado_reproduccion,
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
+                )
+                for cow in cow_models
+            ]
+        finally:
+            session.close()
+
+    async def get_all_cows_by_snapshot(
+        self,
+        global_hato_id: int,
+        user_id: int,
+        page: int = 1,
+        limit: int = 10,
+        sort_by: Optional[str] = None,
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        nombre_grupo: Optional[str] = None,
+        recomendacion: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get all cows for a snapshot with pagination, sorting, and filtering."""
+        session = self.db.get_session()
+        try:
+            # Verify ownership
+            global_hato = session.query(GlobalHatoModel).filter(
+                GlobalHatoModel.id == global_hato_id,
+                GlobalHatoModel.user_id == user_id
+            ).first()
+
+            if not global_hato:
+                return {
+                    'cows': [],
+                    'total': 0,
+                    'page': page,
+                    'limit': limit,
+                    'pages': 0
+                }
+
+            # Base query
+            query = session.query(CowModel).filter(
+                CowModel.global_hato_id == global_hato_id
+            )
+
+            # Apply search filter (partial match on multiple columns)
+            if search:
+                search_pattern = f'%{search}%'
+                query = query.filter(
+                    (CowModel.numero_animal.ilike(search_pattern)) |
+                    (CowModel.nombre_grupo.ilike(search_pattern)) |
+                    (CowModel.estado_reproduccion.ilike(search_pattern))
+                )
+
+            # Apply group filter (exact match)
+            if nombre_grupo:
+                query = query.filter(CowModel.nombre_grupo == nombre_grupo)
+
+            # Apply recommendation filter (exact match)
+            if recomendacion is not None:
+                query = query.filter(CowModel.recomendacion == recomendacion)
+
+            # Apply sorting
+            if sort_by and sort_order:
+                column_map = {
+                    'id': CowModel.id,
+                    'numero_animal': CowModel.numero_animal,
+                    'nombre_grupo': CowModel.nombre_grupo,
+                    'produccion_leche_ayer': CowModel.produccion_leche_ayer,
+                    'produccion_media_7dias': CowModel.produccion_media_7dias,
+                    'estado_reproduccion': CowModel.estado_reproduccion,
+                    'estado_reproduccion': CowModel.estado_reproduccion,
+                    'dias_ordeno': CowModel.dias_ordeno,
+                    'numero_seleccion': CowModel.numero_seleccion,
+                    'recomendacion': CowModel.recomendacion
+                }
+                if sort_by in column_map:
+                    column = column_map[sort_by]
+                    if sort_order.lower() == 'desc':
+                        query = query.order_by(column.desc())
+                    else:
+                        query = query.order_by(column.asc())
+            else:
+                # Default sorting by id ascending
+                query = query.order_by(CowModel.id.asc())
+
+            # Get total count
+            total = query.count()
+
+            # Apply pagination
+            offset = (page - 1) * limit
+            cow_models = query.offset(offset).limit(limit).all()
+
+            # Calculate total pages
+            pages = (total + limit - 1) // limit if total > 0 else 0
+
+            # Convert to entities
+            cows = [
+                Cow(
+                    id=cow.id,
+                    global_hato_id=cow.global_hato_id,
+                    numero_animal=cow.numero_animal,
+                    nombre_grupo=cow.nombre_grupo,
+                    produccion_leche_ayer=cow.produccion_leche_ayer,
+                    produccion_media_7dias=cow.produccion_media_7dias,
+                    estado_reproduccion=cow.estado_reproduccion,
+                    dias_ordeno=cow.dias_ordeno,
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
+                )
+                for cow in cow_models
+            ]
+
+            return {
+                'cows': cows,
+                'total': total,
+                'page': page,
+                'limit': limit,
+                'pages': pages
+            }
         finally:
             session.close()
 

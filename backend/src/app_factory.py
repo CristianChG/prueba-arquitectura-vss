@@ -34,7 +34,10 @@ from domain.usecases import (
     DeleteGlobalHato,
     RequestPasswordReset,
     ResetPassword,
-    VerifyResetCode
+    VerifyResetCode,
+    GetCorralesBySnapshot,
+    GetCowsByGroup,
+    GetAllCowsBySnapshot
 )
 from infrastructure.adapters.email_service import EmailService
 
@@ -60,18 +63,29 @@ def create_app() -> Flask:
     app.config['SECRET_KEY'] = app_config.SECRET_KEY
     app.config['MAX_CONTENT_LENGTH'] = app_config.MAX_CONTENT_LENGTH
 
-    # Configure CORS
-    CORS(app, origins=app_config.CORS_ORIGINS)
+    # Configure CORS with support for preflight requests
+    CORS(
+        app,
+        origins=app_config.CORS_ORIGINS,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+        supports_credentials=True
+    )
 
     # Initialize database
     db_config.create_all_tables()
 
+    from infrastructure.ml.services import PredictionService
+    
     # Dependency Injection: Create repository instances
     auth_repository = AuthRepositoryAdapter()
     user_repository = UserRepositoryAdapter()
     cow_repository = CowRepositoryAdapter()
     dataset_repository = DatasetRepositoryAdapter()
     global_hato_repository = GlobalHatoRepositoryAdapter()
+
+    # Dependency Injection: Create service instances
+    prediction_service = PredictionService(model_dir=os.path.join(os.path.dirname(__file__), 'infrastructure', 'ml', 'models'))
 
     # Dependency Injection: Create use case instances
     login_user = LoginUser(auth_repository)
@@ -82,14 +96,16 @@ def create_app() -> Flask:
     upload_dataset = UploadDataset(dataset_repository)
     get_all_users = GetAllUsers(user_repository)
     update_user_role = UpdateUserRole(user_repository)
-    create_global_hato = CreateGlobalHato(global_hato_repository)
+    create_global_hato = CreateGlobalHato(global_hato_repository, prediction_service)
     get_all_global_hatos = GetAllGlobalHatos(global_hato_repository)
     delete_global_hato = DeleteGlobalHato(global_hato_repository)
-    
     email_service = EmailService()
     request_password_reset = RequestPasswordReset(auth_repository, email_service)
     reset_password_usecase = ResetPassword(auth_repository)
     verify_reset_code_usecase = VerifyResetCode(auth_repository)
+    get_corrales_by_snapshot = GetCorralesBySnapshot(global_hato_repository)
+    get_cows_by_group = GetCowsByGroup(global_hato_repository)
+    get_all_cows_by_snapshot = GetAllCowsBySnapshot(global_hato_repository)
 
     # Dependency Injection: Create controller instances
     auth_controller = AuthController(
@@ -114,7 +130,10 @@ def create_app() -> Flask:
     global_hato_controller = GlobalHatoController(
         create_global_hato=create_global_hato,
         get_all_global_hatos=get_all_global_hatos,
-        delete_global_hato=delete_global_hato
+        delete_global_hato=delete_global_hato,
+        get_corrales_by_snapshot=get_corrales_by_snapshot,
+        get_cows_by_group=get_cows_by_group,
+        get_all_cows_by_snapshot=get_all_cows_by_snapshot
     )
 
     # Register blueprints with injected controllers

@@ -9,6 +9,8 @@ export interface Cow {
   produccion_media_7dias: number;
   estado_reproduccion: string;
   dias_ordeno: number;
+  numero_seleccion?: string;
+  recomendacion?: number;
 }
 
 export interface GlobalHato {
@@ -20,6 +22,14 @@ export interface GlobalHato {
   grupos_detectados: number;
   created_at: string; // ISO datetime string
   blob_route?: string; // Optional: path to CSV file
+}
+
+export interface Corral {
+  nombre_grupo: string;
+  total_animales: number;
+  produccion_promedio: number;
+  produccion_total: number;
+  produccion_promedio_7dias: number;
 }
 
 export interface Pagination {
@@ -55,6 +65,21 @@ export interface CreateGlobalHatoData {
     estado_reproduccion: string;
     dias_ordeno: number;
   }>;
+}
+
+export interface GetCowsParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  nombreGrupo?: string;
+  recomendacion?: number;
+}
+
+export interface GetCowsResponse {
+  cows: Cow[];
+  pagination: Pagination;
 }
 
 export class GlobalHatosAPI {
@@ -114,6 +139,37 @@ export class GlobalHatosAPI {
     const response = await axiosInstance.get(`${this.BASE_PATH}/${id}/download`, {
       responseType: 'blob',
     });
+    return response.data;
+  }
+
+  static async getCorralesBySnapshot(id: number): Promise<Corral[]> {
+    const response = await axiosInstance.get<Corral[]>(`${this.BASE_PATH}/${id}/corrales`);
+    return response.data;
+  }
+
+  static async getCowsByGroup(id: number, nombreGrupo: string): Promise<Cow[]> {
+    const response = await axiosInstance.get<Cow[]>(
+      `${this.BASE_PATH}/${id}/grupos/${encodeURIComponent(nombreGrupo)}/vacas`
+    );
+    return response.data;
+  }
+
+  static async getAllCowsBySnapshot(snapshotId: number, params?: GetCowsParams): Promise<GetCowsResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sort_by', params.sortBy);
+    if (params?.sortOrder) queryParams.append('sort_order', params.sortOrder);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.nombreGrupo) queryParams.append('nombre_grupo', params.nombreGrupo);
+    if (params?.recomendacion !== undefined) queryParams.append('recomendacion', params.recomendacion.toString());
+
+    const url = queryParams.toString()
+      ? `${this.BASE_PATH}/${snapshotId}/vacas?${queryParams.toString()}`
+      : `${this.BASE_PATH}/${snapshotId}/vacas`;
+
+    const response = await axiosInstance.get<GetCowsResponse>(url);
     return response.data;
   }
 }

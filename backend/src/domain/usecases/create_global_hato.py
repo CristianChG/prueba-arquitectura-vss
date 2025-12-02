@@ -3,13 +3,15 @@ from typing import List, Dict, Any, Optional
 from datetime import date, datetime
 from domain.repositories import IGlobalHatoRepository
 from domain.entities import GlobalHato, Cow
+from infrastructure.ml.services import PredictionService
 
 
 class CreateGlobalHato:
     """Use case for creating a new Global Hato snapshot with cows."""
 
-    def __init__(self, global_hato_repository: IGlobalHatoRepository):
+    def __init__(self, global_hato_repository: IGlobalHatoRepository, prediction_service: PredictionService):
         self.global_hato_repository = global_hato_repository
+        self.prediction_service = prediction_service
 
     async def execute(
         self,
@@ -63,19 +65,25 @@ class CreateGlobalHato:
         )
 
         # Create Cow entities
-        cows = [
-            Cow(
-                id=0,  # Will be set by database
-                global_hato_id=0,  # Will be set after global_hato creation
-                numero_animal=str(cow.get('numero_animal', '')),
-                nombre_grupo=str(cow.get('nombre_grupo', '')),
-                produccion_leche_ayer=float(cow.get('produccion_leche_ayer', 0)),
-                produccion_media_7dias=float(cow.get('produccion_media_7dias', 0)),
-                estado_reproduccion=str(cow.get('estado_reproduccion', '')),
-                dias_ordeno=int(cow.get('dias_ordeno', 0))
+        cows = []
+        for cow_data in cows_data:
+            # Predict category
+            recomendacion = self.prediction_service.predict_cow_category(cow_data)
+            
+            cows.append(
+                Cow(
+                    id=0,  # Will be set by database
+                    global_hato_id=0,  # Will be set after global_hato creation
+                    numero_animal=str(cow_data.get('numero_animal', '')),
+                    nombre_grupo=str(cow_data.get('nombre_grupo', '')),
+                    produccion_leche_ayer=float(cow_data['produccion_leche_ayer']) if cow_data.get('produccion_leche_ayer') is not None else None,
+                    produccion_media_7dias=float(cow_data['produccion_media_7dias']) if cow_data.get('produccion_media_7dias') is not None else None,
+                    estado_reproduccion=str(cow_data.get('estado_reproduccion', '')),
+                    dias_ordeno=int(cow_data['dias_ordeno']) if cow_data.get('dias_ordeno') is not None else None,
+                    numero_seleccion=str(cow_data['numero_seleccion']) if cow_data.get('numero_seleccion') else None,
+                    recomendacion=recomendacion
+                )
             )
-            for cow in cows_data
-        ]
 
         # Save to repository
         return await self.global_hato_repository.create_global_hato(global_hato, cows)

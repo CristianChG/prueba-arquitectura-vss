@@ -37,6 +37,33 @@ class IGlobalHatoRepository(Protocol):
         """Find Global Hato snapshot by ID."""
         ...
 
+    async def get_corrales_by_snapshot(self, global_hato_id: int, user_id: int) -> List[Any]:
+        """Get aggregated corral data for a snapshot."""
+        ...
+
+    async def get_cows_by_group(self, global_hato_id: int, user_id: int, nombre_grupo: str) -> List[Cow]:
+        """Get cows for a specific group in a snapshot."""
+        ...
+
+    async def get_all_cows_by_snapshot(
+        self,
+        global_hato_id: int,
+        user_id: int,
+        page: int = 1,
+        limit: int = 10,
+        sort_by: Optional[str] = None,
+        sort_order: Optional[str] = None,
+        search: Optional[str] = None,
+        nombre_grupo: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get all cows for a snapshot with pagination, sorting, and filtering.
+
+        Returns:
+            Dict with 'cows', 'pagination' (total, page, limit, pages)
+        """
+        ...
+
     async def delete(self, global_hato_id: int, user_id: int) -> None:
         """Delete Global Hato snapshot and all associated cows (with user ownership check)."""
         ...

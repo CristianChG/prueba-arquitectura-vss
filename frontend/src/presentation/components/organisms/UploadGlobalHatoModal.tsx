@@ -55,8 +55,20 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
       setFile(uploadedFile);
       setError(null);
       setWarnings(null);
+
+      // Auto-populate nombre from filename if nombre is empty
+      if (!nombre.trim()) {
+        const fileNameWithoutExtension = uploadedFile.name.replace(/\.csv$/i, '');
+        setNombre(fileNameWithoutExtension);
+      }
+
+      // Auto-populate fecha with current date if fecha is empty
+      if (!fechaSnapshot) {
+        const today = new Date().toISOString().split('T')[0];
+        setFechaSnapshot(today);
+      }
     }
-  }, []);
+  }, [nombre, fechaSnapshot]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
