@@ -19,8 +19,10 @@ export interface CategoryFrequency {
  * @returns Array of histogram bins with ranges, counts, and percentages
  */
 export function calculateHistogram(values: number[], numBins: number): HistogramBin[] {
-  // Filter out null/undefined values
-  const validValues = values.filter((val) => val != null && !isNaN(val));
+  // Filter out null/undefined values and ensure they are numbers
+  const validValues = values
+    .map((val) => Number(val))
+    .filter((val) => val != null && !isNaN(val));
 
   if (validValues.length === 0) {
     return [];

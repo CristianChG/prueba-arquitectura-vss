@@ -19,8 +19,10 @@ export interface CategoricalStatistics {
  * @returns Statistics object with n, mean, standard deviation, min, and max
  */
 export function calculateNumericStatistics(values: number[]): NumericStatistics {
-  // Filter out null/undefined values
-  const validValues = values.filter((val) => val != null && !isNaN(val));
+  // Filter out null/undefined values and ensure they are numbers
+  const validValues = values
+    .map((val) => Number(val))
+    .filter((val) => val != null && !isNaN(val));
 
   if (validValues.length === 0) {
     return {

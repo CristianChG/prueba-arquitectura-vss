@@ -105,7 +105,8 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
           display: 'flex',
           gap: 4,
           mb: 3,
-          alignItems: 'flex-end',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           flexDirection: { xs: 'column', sm: 'row' },
         }}
       >
@@ -113,11 +114,13 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
           selectedVariable={selectedVariable}
           onVariableChange={setSelectedVariable}
         />
-        <BinSlider
-          binCount={binCount}
-          onBinCountChange={setBinCount}
-          visible={variableType === 'numeric'}
-        />
+        {variableType === 'numeric' && (
+          <BinSlider
+            binCount={binCount}
+            onBinCountChange={setBinCount}
+            visible={true}
+          />
+        )}
       </Box>
 
       {/* Error State */}
@@ -145,7 +148,11 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
         {!loading && selectedSnapshotId && chartData && (
           <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: 'transparent' }}>
             {variableType === 'numeric' ? (
-              <HistogramChart data={chartData as any} variableLabel={getVariableLabel()} />
+              <HistogramChart
+                data={chartData as any}
+                variableLabel={getVariableLabel()}
+                statistics={statistics as any}
+              />
             ) : (
               <CategoricalBarChart data={chartData as any} variableLabel={getVariableLabel()} />
             )}
