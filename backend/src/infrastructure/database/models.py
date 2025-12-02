@@ -14,6 +14,8 @@ class UserModel(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
     role = Column(Integer, nullable=False, default=3)  # 1=ADMIN, 2=COLAB, 3=PENDING_APPROVAL
+    reset_code = Column(String, nullable=True)
+    reset_code_expires = Column(DateTime, nullable=True)
 
     # Relationships
     global_hatos = relationship("GlobalHatoModel", back_populates="uploader", cascade="all, delete-orphan")

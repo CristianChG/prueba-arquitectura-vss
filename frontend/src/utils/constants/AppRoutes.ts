@@ -5,4 +5,6 @@ export const APP_ROUTES = {
   DASHBOARD: "/dashboard",
   PENDING_APPROVAL: "/pending-approval",
   ARCHIVOS: "/archivos",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
 };
