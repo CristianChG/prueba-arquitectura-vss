@@ -186,8 +186,50 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   direction={orderBy === 'recomendacion' ? order : 'asc'}
                   onClick={() => handleRequestSort('recomendacion')}
                 >
-                  Recomendación
-                  <AutoAwesomeIcon sx={{ fontSize: 16, ml: 0.5, color: 'inherit' }} />
+                  <Box
+                    component="span"
+                    sx={{
+                      position: 'relative',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {/* Base Content */}
+                    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <AutoAwesomeIcon sx={{ fontSize: 16, mr: 0.5, color: 'inherit' }} /> Recomendación
+                    </Box>
+
+                    {/* Shimmer Overlay - Clipped to text */}
+                    <Box
+                      component="span"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%)',
+                        backgroundSize: '200% 100%',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        color: 'transparent',
+                        animation: 'shine 3s infinite linear',
+                        pointerEvents: 'none',
+                        '@keyframes shine': {
+                          '0%': { backgroundPosition: '200% 0' },
+                          '100%': { backgroundPosition: '-100% 0' }
+                        },
+                        // Ensure icon inherits transparent color to show background
+                        '& .MuiSvgIcon-root': {
+                          color: 'inherit',
+                        }
+                      }}
+                    >
+                      <AutoAwesomeIcon sx={{ fontSize: 16, mr: 0.5 }} /> Recomendación
+                    </Box>
+                  </Box>
                 </TableSortLabel>
               </TableCell>
             </TableRow>
