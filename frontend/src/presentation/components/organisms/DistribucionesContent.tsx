@@ -144,30 +144,46 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
 
       {/* Loading State with Opacity */}
       <Box sx={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out' }}>
-        {/* Chart Section */}
-        {!loading && selectedSnapshotId && chartData && (
-          <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: 'transparent' }}>
-            {variableType === 'numeric' ? (
-              <HistogramChart
-                data={chartData as any}
-                variableLabel={getVariableLabel()}
-                statistics={statistics as any}
-              />
-            ) : (
-              <CategoricalBarChart data={chartData as any} variableLabel={getVariableLabel()} />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '3fr 1fr' },
+            gap: 3,
+          }}
+        >
+          {/* Chart Section */}
+          <Box>
+            {!loading && selectedSnapshotId && chartData && (
+              <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: 'transparent' }}>
+                {variableType === 'numeric' ? (
+                  <HistogramChart
+                    data={chartData as any}
+                    variableLabel={getVariableLabel()}
+                    statistics={statistics as any}
+                  />
+                ) : (
+                  <CategoricalBarChart data={chartData as any} variableLabel={getVariableLabel()} />
+                )}
+              </Paper>
             )}
-          </Paper>
-        )}
 
-        {/* Empty Dataset State */}
-        {!loading && selectedSnapshotId && cows.length === 0 && !error && (
-          <Alert severity="warning">No hay datos disponibles para este snapshot</Alert>
-        )}
+            {/* Empty Dataset State */}
+            {!loading && selectedSnapshotId && cows.length === 0 && !error && (
+              <Alert severity="warning">No hay datos disponibles para este snapshot</Alert>
+            )}
+          </Box>
 
-        {/* Statistics Section */}
-        {!loading && selectedSnapshotId && statistics && (
-          <StatisticsCard statistics={statistics} variableType={variableType} />
-        )}
+          {/* Statistics Section */}
+          <Box>
+            {!loading && selectedSnapshotId && statistics && (
+              <StatisticsCard
+                statistics={statistics}
+                variableType={variableType}
+                orientation="vertical"
+              />
+            )}
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
