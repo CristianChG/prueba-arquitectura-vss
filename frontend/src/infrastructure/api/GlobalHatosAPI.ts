@@ -10,6 +10,7 @@ export interface Cow {
   estado_reproduccion: string;
   dias_ordeno: number;
   numero_seleccion?: string;
+  recomendacion?: number;
 }
 
 export interface GlobalHato {

@@ -236,7 +236,13 @@ class GlobalHatoController:
                                 'produccion_media_7dias': safe_float(row.get('Producción media diaria últimos 7 días')),
                                 'estado_reproduccion': safe_str(row.get('Estado de la reproducción')),
                                 'dias_ordeno': safe_int(row.get('Días en ordeño')),
-                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal'))
+                                'numero_seleccion': safe_str(row.get('Número(s) de selección de animal')),
+                                # Fields for AI Model
+                                'numero_lactacion': safe_int(row.get('Nº Lactación')),
+                                'numero_inseminaciones': safe_int(row.get('Número de inseminaciones')),
+                                'dias_prenada': safe_int(row.get('Días preñada')),
+                                'dias_para_parto': safe_int(row.get('Días para el parto')),
+                                'produccion_total_lactacion': safe_float(row.get('Producción TOTAL en lactación'))
                             }
 
                             # Validate required fields
@@ -392,7 +398,8 @@ class GlobalHatoController:
                     "produccion_media_7dias": cow.produccion_media_7dias,
                     "estado_reproduccion": cow.estado_reproduccion,
                     "dias_ordeno": cow.dias_ordeno,
-                    "numero_seleccion": cow.numero_seleccion
+                    "numero_seleccion": cow.numero_seleccion,
+                    "recomendacion": cow.recomendacion
                 }
                 for cow in cows
             ]), 200
@@ -436,7 +443,8 @@ class GlobalHatoController:
                         "produccion_media_7dias": cow.produccion_media_7dias,
                         "estado_reproduccion": cow.estado_reproduccion,
                         "dias_ordeno": cow.dias_ordeno,
-                        "numero_seleccion": cow.numero_seleccion
+                        "numero_seleccion": cow.numero_seleccion,
+                        "recomendacion": cow.recomendacion
                     }
                     for cow in result['cows']
                 ],

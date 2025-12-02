@@ -12,6 +12,7 @@ import {
   TablePagination,
   TableSortLabel,
 } from '@mui/material';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { GlobalHatosAPI, type Cow, type Pagination } from '../../../infrastructure/api/GlobalHatosAPI';
 
 interface CowsTableProps {
@@ -179,12 +180,22 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   Días Ordeño
                 </TableSortLabel>
               </TableCell>
+              <TableCell sx={{ fontWeight: 600, width: '15%' }}>
+                <TableSortLabel
+                  active={orderBy === 'recomendacion'}
+                  direction={orderBy === 'recomendacion' ? order : 'asc'}
+                  onClick={() => handleRequestSort('recomendacion')}
+                >
+                  Recomendación
+                  <AutoAwesomeIcon sx={{ fontSize: 16, ml: 0.5, color: 'inherit' }} />
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {cows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   <Typography color="text.secondary" sx={{ py: 2 }}>
                     {loading ? 'Cargando...' : 'No hay vacas disponibles'}
                   </Typography>
@@ -204,6 +215,50 @@ export const CowsTable: React.FC<CowsTableProps> = ({
                   </TableCell>
                   <TableCell>{cow.estado_reproduccion}</TableCell>
                   <TableCell>{cow.dias_ordeno ?? '-'}</TableCell>
+                  <TableCell>
+                    {(() => {
+                      let text = '-';
+                      let color = 'transparent';
+                      let textColor = 'inherit';
+
+                      switch (cow.recomendacion) {
+                        case 0:
+                          text = 'Producción';
+                          color = '#e8f5e9'; // Light green
+                          textColor = '#2e7d32'; // Dark green
+                          break;
+                        case 1:
+                          text = 'Monitorear';
+                          color = '#fff3e0'; // Light orange
+                          textColor = '#ef6c00'; // Dark orange
+                          break;
+                        case 2:
+                          text = 'Secar';
+                          color = '#ffebee'; // Light red
+                          textColor = '#c62828'; // Dark red
+                          break;
+                      }
+
+                      if (text === '-') return text;
+
+                      return (
+                        <Box
+                          sx={{
+                            backgroundColor: color,
+                            color: textColor,
+                            py: 0.5,
+                            px: 1.5,
+                            borderRadius: '16px',
+                            display: 'inline-block',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          {text}
+                        </Box>
+                      );
+                    })()}
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -225,6 +280,6 @@ export const CowsTable: React.FC<CowsTableProps> = ({
           }
         />
       </TableContainer>
-    </Box>
+    </Box >
   );
 };

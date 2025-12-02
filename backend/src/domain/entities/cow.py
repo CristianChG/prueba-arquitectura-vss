@@ -14,3 +14,4 @@ class Cow:
     estado_reproduccion: Optional[str] = None
     dias_ordeno: Optional[int] = None
     numero_seleccion: Optional[str] = None
+    recomendacion: Optional[int] = None

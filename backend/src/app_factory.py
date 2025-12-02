@@ -75,12 +75,17 @@ def create_app() -> Flask:
     # Initialize database
     db_config.create_all_tables()
 
+    from infrastructure.ml.services import PredictionService
+    
     # Dependency Injection: Create repository instances
     auth_repository = AuthRepositoryAdapter()
     user_repository = UserRepositoryAdapter()
     cow_repository = CowRepositoryAdapter()
     dataset_repository = DatasetRepositoryAdapter()
     global_hato_repository = GlobalHatoRepositoryAdapter()
+
+    # Dependency Injection: Create service instances
+    prediction_service = PredictionService(model_dir=os.path.join(os.path.dirname(__file__), 'infrastructure', 'ml', 'models'))
 
     # Dependency Injection: Create use case instances
     login_user = LoginUser(auth_repository)
@@ -91,7 +96,7 @@ def create_app() -> Flask:
     upload_dataset = UploadDataset(dataset_repository)
     get_all_users = GetAllUsers(user_repository)
     update_user_role = UpdateUserRole(user_repository)
-    create_global_hato = CreateGlobalHato(global_hato_repository)
+    create_global_hato = CreateGlobalHato(global_hato_repository, prediction_service)
     get_all_global_hatos = GetAllGlobalHatos(global_hato_repository)
     delete_global_hato = DeleteGlobalHato(global_hato_repository)
     email_service = EmailService()

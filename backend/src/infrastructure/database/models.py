@@ -57,6 +57,7 @@ class CowModel(Base):
     estado_reproduccion = Column(String, nullable=True)
     dias_ordeno = Column(Integer, nullable=True)
     numero_seleccion = Column(String, nullable=True)
+    recomendacion = Column(Integer, nullable=True)
 
     # Relationships
     global_hato = relationship("GlobalHatoModel", back_populates="cows")

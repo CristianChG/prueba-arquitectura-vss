@@ -45,7 +45,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
                     dias_ordeno=cow.dias_ordeno,
-                    numero_seleccion=cow.numero_seleccion
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
                 )
                 for cow in cows
             ]
@@ -225,7 +226,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
                     dias_ordeno=cow.dias_ordeno,
-                    numero_seleccion=cow.numero_seleccion
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
                 )
                 for cow in cow_models
             ]
@@ -290,7 +292,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     'estado_reproduccion': CowModel.estado_reproduccion,
                     'estado_reproduccion': CowModel.estado_reproduccion,
                     'dias_ordeno': CowModel.dias_ordeno,
-                    'numero_seleccion': CowModel.numero_seleccion
+                    'numero_seleccion': CowModel.numero_seleccion,
+                    'recomendacion': CowModel.recomendacion
                 }
                 if sort_by in column_map:
                     column = column_map[sort_by]
@@ -323,7 +326,8 @@ class GlobalHatoRepositoryAdapter(IGlobalHatoRepository):
                     produccion_media_7dias=cow.produccion_media_7dias,
                     estado_reproduccion=cow.estado_reproduccion,
                     dias_ordeno=cow.dias_ordeno,
-                    numero_seleccion=cow.numero_seleccion
+                    numero_seleccion=cow.numero_seleccion,
+                    recomendacion=cow.recomendacion
                 )
                 for cow in cow_models
             ]
