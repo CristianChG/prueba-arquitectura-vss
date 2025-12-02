@@ -60,7 +60,19 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
     if (cows.length === 0) return null;
 
     const values = cows
-      .map((cow) => cow[selectedVariable as keyof Cow])
+      .map((cow) => {
+        const val = cow[selectedVariable as keyof Cow];
+        // Handle recommendation mapping
+        if (selectedVariable === 'recomendacion' && typeof val === 'number') {
+          switch (val) {
+            case 0: return 'Producción';
+            case 1: return 'Monitorear';
+            case 2: return 'Secar';
+            default: return 'Desconocido';
+          }
+        }
+        return val;
+      })
       .filter((val) => val != null);
 
     if (variableType === 'numeric') {
@@ -75,7 +87,19 @@ export const DistribucionesContent: React.FC<DistribucionesContentProps> = ({
     if (cows.length === 0) return null;
 
     const values = cows
-      .map((cow) => cow[selectedVariable as keyof Cow])
+      .map((cow) => {
+        const val = cow[selectedVariable as keyof Cow];
+        // Handle recommendation mapping
+        if (selectedVariable === 'recomendacion' && typeof val === 'number') {
+          switch (val) {
+            case 0: return 'Producción';
+            case 1: return 'Monitorear';
+            case 2: return 'Secar';
+            default: return 'Desconocido';
+          }
+        }
+        return val;
+      })
       .filter((val) => val != null);
 
     if (variableType === 'numeric') {

@@ -34,6 +34,11 @@ export const AVAILABLE_VARIABLES: VariableDefinition[] = [
     label: 'Grupo',
     type: 'categorical',
   },
+  {
+    value: 'recomendacion',
+    label: 'Recomendación',
+    type: 'categorical',
+  },
 ];
 
 export const getVariableDefinition = (value: string): VariableDefinition | undefined => {
