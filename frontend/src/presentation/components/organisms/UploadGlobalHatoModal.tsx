@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Papa from 'papaparse';
 import { GlobalHatosAPI } from '../../../infrastructure/api/GlobalHatosAPI';
 
 interface UploadGlobalHatoModalProps {
@@ -32,6 +33,7 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<{ message: string; invalid_rows: any[] } | null>(null);
+  const [groupWarning, setGroupWarning] = useState<string | null>(null);
 
   const handleReset = useCallback(() => {
     setNombre('');
@@ -39,6 +41,7 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
     setFile(null);
     setError(null);
     setWarnings(null);
+    setGroupWarning(null);
     setUploading(false);
   }, []);
 
@@ -55,6 +58,32 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
       setFile(uploadedFile);
       setError(null);
       setWarnings(null);
+      setGroupWarning(null);
+
+      // Validate groups
+      Papa.parse(uploadedFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const allowedGroups = ['VMS 1', 'VMS 2', 'VMS 3'];
+          const foundGroups = new Set<string>();
+
+          results.data.forEach((row: any) => {
+            if (row['Nombre del grupo']) {
+              foundGroups.add(row['Nombre del grupo'].trim());
+            }
+          });
+
+          const invalidGroups = Array.from(foundGroups).filter(group => !allowedGroups.includes(group));
+
+          if (invalidGroups.length > 0) {
+            setGroupWarning('Advertencia: Se detectaron grupos adicionales. Solo se considerarán: VMS 1, VMS 2, VMS 3.');
+          }
+        },
+        error: (error) => {
+          console.error('Error parsing CSV:', error);
+        }
+      });
 
       // Auto-populate nombre from filename if nombre is empty
       if (!nombre.trim()) {
@@ -99,6 +128,7 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
       setUploading(true);
       setError(null);
       setWarnings(null);
+      // We don't clear groupWarning here so it persists until success or reset
 
       const response = await GlobalHatosAPI.uploadCSV(nombre, fechaSnapshot, file);
 
@@ -177,8 +207,8 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
               {isDragActive
                 ? 'Suelta el archivo aquí'
                 : file
-                ? file.name
-                : 'Arrastra un archivo CSV o haz clic para seleccionar'}
+                  ? file.name
+                  : 'Arrastra un archivo CSV o haz clic para seleccionar'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               El archivo debe contener las columnas requeridas
@@ -189,6 +219,13 @@ export const UploadGlobalHatoModal: React.FC<UploadGlobalHatoModalProps> = ({
           {file && !error && (
             <Alert severity="success">
               Archivo seleccionado: {file.name}
+            </Alert>
+          )}
+
+          {/* Group Warning Alert */}
+          {groupWarning && (
+            <Alert severity="warning" onClose={() => setGroupWarning(null)}>
+              {groupWarning}
             </Alert>
           )}
 
